@@ -1,10 +1,10 @@
 from pathlib import Path
 from cyclopts import App
 from pandas import Timestamp
-
 from energybench.experiments.kalman_demo import kalman_benchmark
 
-app = App(name="benchmark", help="Benchmark high-frequency time series.")
+
+app = App(name="kalman", help="Benchmark high-frequency time series via a Kalman-filter")
 
 
 @app.command(name="kalman")

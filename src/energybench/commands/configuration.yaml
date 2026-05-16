@@ -1,0 +1,35 @@
+start: 2016-01-01
+end: 2025-12-31
+time_column: DateTime
+total_name: Total_Production_GWh
+
+components:
+  - name: nuclear
+    csv: output/benchmarked_hourly_nuclear.csv
+    column: nuclear_benchmarked_gwh
+    factor: 1.00
+
+  - name: hydro_total
+    csv: output/benchmarked_hourly_water.csv
+    column: water_benchmarked_gwh
+    factor: 1.00
+
+  - name: hydro_storage
+    csv: output/benchmarked_hourly_storage.csv
+    column: storage_benchmarked_gwh
+    factor: 1.00
+
+  - name: hydro_river
+    csv: output/benchmarked_hourly_river.csv
+    column: river_benchmarked_gwh
+    factor: 1.00
+
+  # - name: solar
+  #   csv: output/scaled_hourly_solar_2016_2025.csv
+  #   column: solar_Scaled_GWh
+  #   factor: 1.00
+
+  # - name: wind
+  #   csv: output/scaled_hourly_wind_2016_2025.csv
+  #   column: Wind_Scaled_GWh
+  #   factor: 1.00

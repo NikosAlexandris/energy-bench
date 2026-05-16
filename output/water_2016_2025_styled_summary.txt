@@ -1,0 +1,149 @@
+Bias Detection Analysis for water
+============================================================
+Overall Bias: -47.82%
+Overall MAE: 51.2139
+Overall RMSE: 55.5833
+
+Detected 19 changepoints
+Identified 3 distinct bias patterns
+Generated 13 subperiod recommendations
+
+Top Recommendations:
+------------------------------------------------------------
+1. 2016-01-01 to 2017-01-27: benchmarking (confidence: 80.0%)
+   Reason: High bias (-59.6%) requires temporal disaggregation
+
+2. 2017-01-27 to 2017-12-08: benchmarking (confidence: 80.0%)
+   Reason: High bias (-58.1%) requires temporal disaggregation
+
+3. 2017-12-15 to 2018-03-02: benchmarking (confidence: 80.0%)
+   Reason: High bias (-50.4%) requires temporal disaggregation
+
+4. 2018-03-09 to 2018-11-30: benchmarking (confidence: 80.0%)
+   Reason: High bias (-49.7%) requires temporal disaggregation
+
+5. 2018-12-28 to 2019-02-08: benchmarking (confidence: 80.0%)
+   Reason: High bias (-38.2%) requires temporal disaggregation
+
+
+======================================================================
+DETAILED RECOMMENDATIONS
+======================================================================
+
+1. Period: 2016-01-01 to 2017-01-27
+   Method: benchmarking
+   Confidence: 80.0%
+   Reason: High bias (-59.6%) requires temporal disaggregation
+   Expected improvements:
+     - bias_reduction_pct: 53.6%
+     - mae_reduction_pct: 50.0%
+     - rmse_reduction_pct: 45.0%
+
+2. Period: 2017-01-27 to 2017-12-08
+   Method: benchmarking
+   Confidence: 80.0%
+   Reason: High bias (-58.1%) requires temporal disaggregation
+   Expected improvements:
+     - bias_reduction_pct: 52.3%
+     - mae_reduction_pct: 50.0%
+     - rmse_reduction_pct: 45.0%
+
+3. Period: 2017-12-15 to 2018-03-02
+   Method: benchmarking
+   Confidence: 80.0%
+   Reason: High bias (-50.4%) requires temporal disaggregation
+   Expected improvements:
+     - bias_reduction_pct: 45.4%
+     - mae_reduction_pct: 50.0%
+     - rmse_reduction_pct: 45.0%
+
+4. Period: 2018-03-09 to 2018-11-30
+   Method: benchmarking
+   Confidence: 80.0%
+   Reason: High bias (-49.7%) requires temporal disaggregation
+   Expected improvements:
+     - bias_reduction_pct: 44.7%
+     - mae_reduction_pct: 50.0%
+     - rmse_reduction_pct: 45.0%
+
+5. Period: 2018-12-28 to 2019-02-08
+   Method: benchmarking
+   Confidence: 80.0%
+   Reason: High bias (-38.2%) requires temporal disaggregation
+   Expected improvements:
+     - bias_reduction_pct: 34.3%
+     - mae_reduction_pct: 50.0%
+     - rmse_reduction_pct: 45.0%
+
+6. Period: 2019-02-08 to 2019-12-27
+   Method: benchmarking
+   Confidence: 80.0%
+   Reason: High bias (-49.0%) requires temporal disaggregation
+   Expected improvements:
+     - bias_reduction_pct: 44.1%
+     - mae_reduction_pct: 50.0%
+     - rmse_reduction_pct: 45.0%
+
+7. Period: 2019-12-27 to 2020-10-30
+   Method: benchmarking
+   Confidence: 80.0%
+   Reason: High bias (-50.4%) requires temporal disaggregation
+   Expected improvements:
+     - bias_reduction_pct: 45.4%
+     - mae_reduction_pct: 50.0%
+     - rmse_reduction_pct: 45.0%
+
+8. Period: 2020-10-30 to 2021-12-03
+   Method: benchmarking
+   Confidence: 80.0%
+   Reason: High bias (-49.3%) requires temporal disaggregation
+   Expected improvements:
+     - bias_reduction_pct: 44.3%
+     - mae_reduction_pct: 50.0%
+     - rmse_reduction_pct: 45.0%
+
+9. Period: 2021-12-31 to 2022-12-16
+   Method: benchmarking
+   Confidence: 80.0%
+   Reason: High bias (-53.2%) requires temporal disaggregation
+   Expected improvements:
+     - bias_reduction_pct: 47.9%
+     - mae_reduction_pct: 50.0%
+     - rmse_reduction_pct: 45.0%
+
+10. Period: 2022-12-30 to 2023-03-10
+   Method: benchmarking
+   Confidence: 80.0%
+   Reason: High bias (-43.6%) requires temporal disaggregation
+   Expected improvements:
+     - bias_reduction_pct: 39.3%
+     - mae_reduction_pct: 50.0%
+     - rmse_reduction_pct: 45.0%
+
+11. Period: 2023-03-10 to 2023-12-15
+   Method: benchmarking
+   Confidence: 80.0%
+   Reason: High bias (-52.7%) requires temporal disaggregation
+   Expected improvements:
+     - bias_reduction_pct: 47.4%
+     - mae_reduction_pct: 50.0%
+     - rmse_reduction_pct: 45.0%
+
+12. Period: 2023-12-15 to 2024-12-13
+   Method: benchmarking
+   Confidence: 80.0%
+   Reason: High bias (-46.9%) requires temporal disaggregation
+   Expected improvements:
+     - bias_reduction_pct: 42.2%
+     - mae_reduction_pct: 50.0%
+     - rmse_reduction_pct: 45.0%
+
+13. Period: 2024-12-27 to 2026-01-11
+   Method: advanced_scaling
+   Confidence: 70.0%
+   Reason: Moderate bias with good correlation - advanced scaling recommended
+   Expected improvements:
+     - bias_reduction_pct: 12.1%
+     - mae_reduction_pct: 30.0%
+     - rmse_reduction_pct: 25.0%
+

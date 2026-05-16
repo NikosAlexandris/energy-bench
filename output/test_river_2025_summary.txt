@@ -1,0 +1,532 @@
+Bias Detection Analysis for river
+============================================================
+Overall Bias: -96.31%
+Overall MAE: 43.0772
+Overall RMSE: 46.0766
+
+Detected 0 changepoints
+Identified 3 distinct bias patterns
+Generated 50 subperiod recommendations
+
+Top Recommendations:
+------------------------------------------------------------
+1. 2025-01-01 to 2025-01-31: benchmarking (confidence: 80.0%)
+   Reason: Part of cluster 0 with 26 similar periods
+
+2. 2025-01-08 to 2025-02-07: benchmarking (confidence: 80.0%)
+   Reason: Part of cluster 0 with 26 similar periods
+
+3. 2025-01-15 to 2025-02-14: benchmarking (confidence: 80.0%)
+   Reason: Part of cluster 0 with 26 similar periods
+
+4. 2025-01-22 to 2025-02-21: benchmarking (confidence: 80.0%)
+   Reason: Part of cluster 0 with 26 similar periods
+
+5. 2025-01-29 to 2025-02-28: benchmarking (confidence: 80.0%)
+   Reason: Part of cluster 0 with 26 similar periods
+
+
+======================================================================
+DETAILED RECOMMENDATIONS
+======================================================================
+
+1. Period: 2025-01-01 to 2025-01-31
+   Method: benchmarking
+   Confidence: 80.0%
+   Reason: Part of cluster 0 with 26 similar periods
+   Expected improvements:
+     - bias_reduction_pct: 86.2%
+     - mae_reduction_pct: 50.0%
+     - rmse_reduction_pct: 45.0%
+   Cluster ID: 0
+
+2. Period: 2025-01-08 to 2025-02-07
+   Method: benchmarking
+   Confidence: 80.0%
+   Reason: Part of cluster 0 with 26 similar periods
+   Expected improvements:
+     - bias_reduction_pct: 86.2%
+     - mae_reduction_pct: 50.0%
+     - rmse_reduction_pct: 45.0%
+   Cluster ID: 0
+
+3. Period: 2025-01-15 to 2025-02-14
+   Method: benchmarking
+   Confidence: 80.0%
+   Reason: Part of cluster 0 with 26 similar periods
+   Expected improvements:
+     - bias_reduction_pct: 86.2%
+     - mae_reduction_pct: 50.0%
+     - rmse_reduction_pct: 45.0%
+   Cluster ID: 0
+
+4. Period: 2025-01-22 to 2025-02-21
+   Method: benchmarking
+   Confidence: 80.0%
+   Reason: Part of cluster 0 with 26 similar periods
+   Expected improvements:
+     - bias_reduction_pct: 86.2%
+     - mae_reduction_pct: 50.0%
+     - rmse_reduction_pct: 45.0%
+   Cluster ID: 0
+
+5. Period: 2025-01-29 to 2025-02-28
+   Method: benchmarking
+   Confidence: 80.0%
+   Reason: Part of cluster 0 with 26 similar periods
+   Expected improvements:
+     - bias_reduction_pct: 86.2%
+     - mae_reduction_pct: 50.0%
+     - rmse_reduction_pct: 45.0%
+   Cluster ID: 0
+
+6. Period: 2025-02-05 to 2025-03-07
+   Method: benchmarking
+   Confidence: 80.0%
+   Reason: Part of cluster 0 with 26 similar periods
+   Expected improvements:
+     - bias_reduction_pct: 86.2%
+     - mae_reduction_pct: 50.0%
+     - rmse_reduction_pct: 45.0%
+   Cluster ID: 0
+
+7. Period: 2025-02-12 to 2025-03-14
+   Method: benchmarking
+   Confidence: 80.0%
+   Reason: Part of cluster 0 with 26 similar periods
+   Expected improvements:
+     - bias_reduction_pct: 86.2%
+     - mae_reduction_pct: 50.0%
+     - rmse_reduction_pct: 45.0%
+   Cluster ID: 0
+
+8. Period: 2025-02-19 to 2025-03-21
+   Method: benchmarking
+   Confidence: 80.0%
+   Reason: Part of cluster 0 with 26 similar periods
+   Expected improvements:
+     - bias_reduction_pct: 86.3%
+     - mae_reduction_pct: 50.0%
+     - rmse_reduction_pct: 45.0%
+   Cluster ID: 0
+
+9. Period: 2025-02-26 to 2025-03-28
+   Method: benchmarking
+   Confidence: 80.0%
+   Reason: Part of cluster 0 with 26 similar periods
+   Expected improvements:
+     - bias_reduction_pct: 86.3%
+     - mae_reduction_pct: 50.0%
+     - rmse_reduction_pct: 45.0%
+   Cluster ID: 0
+
+10. Period: 2025-03-05 to 2025-04-04
+   Method: benchmarking
+   Confidence: 80.0%
+   Reason: Part of cluster 0 with 26 similar periods
+   Expected improvements:
+     - bias_reduction_pct: 86.3%
+     - mae_reduction_pct: 50.0%
+     - rmse_reduction_pct: 45.0%
+   Cluster ID: 0
+
+11. Period: 2025-03-12 to 2025-04-11
+   Method: benchmarking
+   Confidence: 80.0%
+   Reason: Part of cluster 0 with 26 similar periods
+   Expected improvements:
+     - bias_reduction_pct: 86.4%
+     - mae_reduction_pct: 50.0%
+     - rmse_reduction_pct: 45.0%
+   Cluster ID: 0
+
+12. Period: 2025-03-19 to 2025-04-18
+   Method: benchmarking
+   Confidence: 80.0%
+   Reason: Part of cluster 0 with 26 similar periods
+   Expected improvements:
+     - bias_reduction_pct: 86.4%
+     - mae_reduction_pct: 50.0%
+     - rmse_reduction_pct: 45.0%
+   Cluster ID: 0
+
+13. Period: 2025-03-26 to 2025-04-25
+   Method: benchmarking
+   Confidence: 80.0%
+   Reason: Part of cluster 0 with 26 similar periods
+   Expected improvements:
+     - bias_reduction_pct: 86.5%
+     - mae_reduction_pct: 50.0%
+     - rmse_reduction_pct: 45.0%
+   Cluster ID: 0
+
+14. Period: 2025-04-02 to 2025-05-02
+   Method: benchmarking
+   Confidence: 80.0%
+   Reason: Part of cluster 0 with 26 similar periods
+   Expected improvements:
+     - bias_reduction_pct: 86.6%
+     - mae_reduction_pct: 50.0%
+     - rmse_reduction_pct: 45.0%
+   Cluster ID: 0
+
+15. Period: 2025-09-24 to 2025-10-24
+   Method: benchmarking
+   Confidence: 80.0%
+   Reason: Part of cluster 0 with 26 similar periods
+   Expected improvements:
+     - bias_reduction_pct: 86.8%
+     - mae_reduction_pct: 50.0%
+     - rmse_reduction_pct: 45.0%
+   Cluster ID: 0
+
+16. Period: 2025-10-01 to 2025-10-31
+   Method: benchmarking
+   Confidence: 80.0%
+   Reason: Part of cluster 0 with 26 similar periods
+   Expected improvements:
+     - bias_reduction_pct: 86.8%
+     - mae_reduction_pct: 50.0%
+     - rmse_reduction_pct: 45.0%
+   Cluster ID: 0
+
+17. Period: 2025-10-08 to 2025-11-07
+   Method: benchmarking
+   Confidence: 80.0%
+   Reason: Part of cluster 0 with 26 similar periods
+   Expected improvements:
+     - bias_reduction_pct: 86.8%
+     - mae_reduction_pct: 50.0%
+     - rmse_reduction_pct: 45.0%
+   Cluster ID: 0
+
+18. Period: 2025-10-15 to 2025-11-14
+   Method: benchmarking
+   Confidence: 80.0%
+   Reason: Part of cluster 0 with 26 similar periods
+   Expected improvements:
+     - bias_reduction_pct: 86.8%
+     - mae_reduction_pct: 50.0%
+     - rmse_reduction_pct: 45.0%
+   Cluster ID: 0
+
+19. Period: 2025-10-22 to 2025-11-21
+   Method: benchmarking
+   Confidence: 80.0%
+   Reason: Part of cluster 0 with 26 similar periods
+   Expected improvements:
+     - bias_reduction_pct: 86.8%
+     - mae_reduction_pct: 50.0%
+     - rmse_reduction_pct: 45.0%
+   Cluster ID: 0
+
+20. Period: 2025-10-29 to 2025-11-28
+   Method: benchmarking
+   Confidence: 80.0%
+   Reason: Part of cluster 0 with 26 similar periods
+   Expected improvements:
+     - bias_reduction_pct: 86.8%
+     - mae_reduction_pct: 50.0%
+     - rmse_reduction_pct: 45.0%
+   Cluster ID: 0
+
+21. Period: 2025-11-05 to 2025-12-05
+   Method: benchmarking
+   Confidence: 80.0%
+   Reason: Part of cluster 0 with 26 similar periods
+   Expected improvements:
+     - bias_reduction_pct: 86.8%
+     - mae_reduction_pct: 50.0%
+     - rmse_reduction_pct: 45.0%
+   Cluster ID: 0
+
+22. Period: 2025-11-12 to 2025-12-12
+   Method: benchmarking
+   Confidence: 80.0%
+   Reason: Part of cluster 0 with 26 similar periods
+   Expected improvements:
+     - bias_reduction_pct: 86.9%
+     - mae_reduction_pct: 50.0%
+     - rmse_reduction_pct: 45.0%
+   Cluster ID: 0
+
+23. Period: 2025-11-19 to 2025-12-19
+   Method: benchmarking
+   Confidence: 80.0%
+   Reason: Part of cluster 0 with 26 similar periods
+   Expected improvements:
+     - bias_reduction_pct: 86.9%
+     - mae_reduction_pct: 50.0%
+     - rmse_reduction_pct: 45.0%
+   Cluster ID: 0
+
+24. Period: 2025-11-26 to 2025-12-26
+   Method: benchmarking
+   Confidence: 80.0%
+   Reason: Part of cluster 0 with 26 similar periods
+   Expected improvements:
+     - bias_reduction_pct: 86.9%
+     - mae_reduction_pct: 50.0%
+     - rmse_reduction_pct: 45.0%
+   Cluster ID: 0
+
+25. Period: 2025-12-03 to 2026-01-02
+   Method: benchmarking
+   Confidence: 80.0%
+   Reason: Part of cluster 0 with 26 similar periods
+   Expected improvements:
+     - bias_reduction_pct: 86.9%
+     - mae_reduction_pct: 50.0%
+     - rmse_reduction_pct: 45.0%
+   Cluster ID: 0
+
+26. Period: 2025-12-10 to 2026-01-09
+   Method: benchmarking
+   Confidence: 80.0%
+   Reason: Part of cluster 0 with 26 similar periods
+   Expected improvements:
+     - bias_reduction_pct: 86.9%
+     - mae_reduction_pct: 50.0%
+     - rmse_reduction_pct: 45.0%
+   Cluster ID: 0
+
+27. Period: 2025-06-04 to 2025-07-04
+   Method: benchmarking
+   Confidence: 80.0%
+   Reason: Part of cluster 1 with 4 similar periods
+   Expected improvements:
+     - bias_reduction_pct: 86.9%
+     - mae_reduction_pct: 50.0%
+     - rmse_reduction_pct: 45.0%
+   Cluster ID: 1
+
+28. Period: 2025-06-11 to 2025-07-11
+   Method: benchmarking
+   Confidence: 80.0%
+   Reason: Part of cluster 1 with 4 similar periods
+   Expected improvements:
+     - bias_reduction_pct: 86.9%
+     - mae_reduction_pct: 50.0%
+     - rmse_reduction_pct: 45.0%
+   Cluster ID: 1
+
+29. Period: 2025-06-18 to 2025-07-18
+   Method: benchmarking
+   Confidence: 80.0%
+   Reason: Part of cluster 1 with 4 similar periods
+   Expected improvements:
+     - bias_reduction_pct: 86.9%
+     - mae_reduction_pct: 50.0%
+     - rmse_reduction_pct: 45.0%
+   Cluster ID: 1
+
+30. Period: 2025-06-25 to 2025-07-25
+   Method: benchmarking
+   Confidence: 80.0%
+   Reason: Part of cluster 1 with 4 similar periods
+   Expected improvements:
+     - bias_reduction_pct: 86.8%
+     - mae_reduction_pct: 50.0%
+     - rmse_reduction_pct: 45.0%
+   Cluster ID: 1
+
+31. Period: 2025-04-09 to 2025-05-09
+   Method: benchmarking
+   Confidence: 80.0%
+   Reason: Part of cluster 2 with 20 similar periods
+   Expected improvements:
+     - bias_reduction_pct: 86.7%
+     - mae_reduction_pct: 50.0%
+     - rmse_reduction_pct: 45.0%
+   Cluster ID: 2
+
+32. Period: 2025-04-16 to 2025-05-16
+   Method: benchmarking
+   Confidence: 80.0%
+   Reason: Part of cluster 2 with 20 similar periods
+   Expected improvements:
+     - bias_reduction_pct: 86.7%
+     - mae_reduction_pct: 50.0%
+     - rmse_reduction_pct: 45.0%
+   Cluster ID: 2
+
+33. Period: 2025-04-23 to 2025-05-23
+   Method: benchmarking
+   Confidence: 80.0%
+   Reason: Part of cluster 2 with 20 similar periods
+   Expected improvements:
+     - bias_reduction_pct: 86.7%
+     - mae_reduction_pct: 50.0%
+     - rmse_reduction_pct: 45.0%
+   Cluster ID: 2
+
+34. Period: 2025-04-30 to 2025-05-30
+   Method: benchmarking
+   Confidence: 80.0%
+   Reason: Part of cluster 2 with 20 similar periods
+   Expected improvements:
+     - bias_reduction_pct: 86.7%
+     - mae_reduction_pct: 50.0%
+     - rmse_reduction_pct: 45.0%
+   Cluster ID: 2
+
+35. Period: 2025-05-07 to 2025-06-06
+   Method: benchmarking
+   Confidence: 80.0%
+   Reason: Part of cluster 2 with 20 similar periods
+   Expected improvements:
+     - bias_reduction_pct: 86.7%
+     - mae_reduction_pct: 50.0%
+     - rmse_reduction_pct: 45.0%
+   Cluster ID: 2
+
+36. Period: 2025-05-14 to 2025-06-13
+   Method: benchmarking
+   Confidence: 80.0%
+   Reason: Part of cluster 2 with 20 similar periods
+   Expected improvements:
+     - bias_reduction_pct: 86.7%
+     - mae_reduction_pct: 50.0%
+     - rmse_reduction_pct: 45.0%
+   Cluster ID: 2
+
+37. Period: 2025-05-21 to 2025-06-20
+   Method: benchmarking
+   Confidence: 80.0%
+   Reason: Part of cluster 2 with 20 similar periods
+   Expected improvements:
+     - bias_reduction_pct: 86.7%
+     - mae_reduction_pct: 50.0%
+     - rmse_reduction_pct: 45.0%
+   Cluster ID: 2
+
+38. Period: 2025-05-28 to 2025-06-27
+   Method: benchmarking
+   Confidence: 80.0%
+   Reason: Part of cluster 2 with 20 similar periods
+   Expected improvements:
+     - bias_reduction_pct: 86.8%
+     - mae_reduction_pct: 50.0%
+     - rmse_reduction_pct: 45.0%
+   Cluster ID: 2
+
+39. Period: 2025-07-02 to 2025-08-01
+   Method: benchmarking
+   Confidence: 80.0%
+   Reason: Part of cluster 2 with 20 similar periods
+   Expected improvements:
+     - bias_reduction_pct: 86.8%
+     - mae_reduction_pct: 50.0%
+     - rmse_reduction_pct: 45.0%
+   Cluster ID: 2
+
+40. Period: 2025-07-09 to 2025-08-08
+   Method: benchmarking
+   Confidence: 80.0%
+   Reason: Part of cluster 2 with 20 similar periods
+   Expected improvements:
+     - bias_reduction_pct: 86.8%
+     - mae_reduction_pct: 50.0%
+     - rmse_reduction_pct: 45.0%
+   Cluster ID: 2
+
+41. Period: 2025-07-16 to 2025-08-15
+   Method: benchmarking
+   Confidence: 80.0%
+   Reason: Part of cluster 2 with 20 similar periods
+   Expected improvements:
+     - bias_reduction_pct: 86.8%
+     - mae_reduction_pct: 50.0%
+     - rmse_reduction_pct: 45.0%
+   Cluster ID: 2
+
+42. Period: 2025-07-23 to 2025-08-22
+   Method: benchmarking
+   Confidence: 80.0%
+   Reason: Part of cluster 2 with 20 similar periods
+   Expected improvements:
+     - bias_reduction_pct: 86.8%
+     - mae_reduction_pct: 50.0%
+     - rmse_reduction_pct: 45.0%
+   Cluster ID: 2
+
+43. Period: 2025-07-30 to 2025-08-29
+   Method: benchmarking
+   Confidence: 80.0%
+   Reason: Part of cluster 2 with 20 similar periods
+   Expected improvements:
+     - bias_reduction_pct: 86.8%
+     - mae_reduction_pct: 50.0%
+     - rmse_reduction_pct: 45.0%
+   Cluster ID: 2
+
+44. Period: 2025-08-06 to 2025-09-05
+   Method: benchmarking
+   Confidence: 80.0%
+   Reason: Part of cluster 2 with 20 similar periods
+   Expected improvements:
+     - bias_reduction_pct: 86.8%
+     - mae_reduction_pct: 50.0%
+     - rmse_reduction_pct: 45.0%
+   Cluster ID: 2
+
+45. Period: 2025-08-13 to 2025-09-12
+   Method: benchmarking
+   Confidence: 80.0%
+   Reason: Part of cluster 2 with 20 similar periods
+   Expected improvements:
+     - bias_reduction_pct: 86.8%
+     - mae_reduction_pct: 50.0%
+     - rmse_reduction_pct: 45.0%
+   Cluster ID: 2
+
+46. Period: 2025-08-20 to 2025-09-19
+   Method: benchmarking
+   Confidence: 80.0%
+   Reason: Part of cluster 2 with 20 similar periods
+   Expected improvements:
+     - bias_reduction_pct: 86.8%
+     - mae_reduction_pct: 50.0%
+     - rmse_reduction_pct: 45.0%
+   Cluster ID: 2
+
+47. Period: 2025-08-27 to 2025-09-26
+   Method: benchmarking
+   Confidence: 80.0%
+   Reason: Part of cluster 2 with 20 similar periods
+   Expected improvements:
+     - bias_reduction_pct: 86.8%
+     - mae_reduction_pct: 50.0%
+     - rmse_reduction_pct: 45.0%
+   Cluster ID: 2
+
+48. Period: 2025-09-03 to 2025-10-03
+   Method: benchmarking
+   Confidence: 80.0%
+   Reason: Part of cluster 2 with 20 similar periods
+   Expected improvements:
+     - bias_reduction_pct: 86.9%
+     - mae_reduction_pct: 50.0%
+     - rmse_reduction_pct: 45.0%
+   Cluster ID: 2
+
+49. Period: 2025-09-10 to 2025-10-10
+   Method: benchmarking
+   Confidence: 80.0%
+   Reason: Part of cluster 2 with 20 similar periods
+   Expected improvements:
+     - bias_reduction_pct: 86.9%
+     - mae_reduction_pct: 50.0%
+     - rmse_reduction_pct: 45.0%
+   Cluster ID: 2
+
+50. Period: 2025-09-17 to 2025-10-17
+   Method: benchmarking
+   Confidence: 80.0%
+   Reason: Part of cluster 2 with 20 similar periods
+   Expected improvements:
+     - bias_reduction_pct: 86.9%
+     - mae_reduction_pct: 50.0%
+     - rmse_reduction_pct: 45.0%
+   Cluster ID: 2
+

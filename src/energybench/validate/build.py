@@ -1,5 +1,13 @@
 from pathlib import Path
 import pandas as pd
+from enum import Enum
+
+
+class KindOfCSV(str, Enum):
+    benchmarked = "benchmarked"
+    scaled = "scaled"
+    scaled_per_day = "scaled-per-day"
+    reconciled = "reconciled"
 
 
 def save_validation_table(check: pd.DataFrame, output_csv: Path) -> None:
@@ -79,30 +87,36 @@ def build_resampled_series(
 
 
 def build_validation_table(
-    benchmark_csv: Path,
-    high_frequency_csv: Path,
+    # required
+    csv_to_validate: Path,
+    kind_of_csv: KindOfCSV,
+    high_frequency_csv: Path | None,
     low_frequency_csv: Path,
     start: pd.Timestamp,
     end: pd.Timestamp,
-    benchmark_value_columns: list[str],
-    high_frequency_value_columns: list[str],
+    # optional
+    csv_value_columns: list[str],
+    high_frequency_columns: list[str] | None,
     low_frequency_columns: list[str],
-    benchmark_datetime_column: str = "DateTime",
+    csv_datetime_column: str = "DateTime",
     high_frequency_datetime_column: str = "DateTime",
     low_frequency_date_column: str = "Date",
     frequency: str = "D",
 ) -> pd.DataFrame:
     """
+    Build a validation table comparing:
+    - high-frequency source (optional),
+    - CSV to validate,
+    - low-frequency reference target.
     """
-    # Read the high-frequency time series, which is our "indicator" or "" ?
-    original = build_resampled_series(
-        csv_file=high_frequency_csv,
+    adjusted = build_resampled_series(
+        csv_file=csv_to_validate,
         start=start,
         end=end,
-        datetime_column=high_frequency_datetime_column,
-        value_columns=high_frequency_value_columns,
+        datetime_column=csv_datetime_column,
+        value_columns=csv_value_columns,
         frequency=frequency,
-        series_name="original",
+        series_name=kind_of_csv.name,
     )
 
     target = build_target_series(
@@ -114,32 +128,77 @@ def build_validation_table(
         frequency=frequency,
     )
 
-    benchmarked = build_resampled_series(
-        csv_file=benchmark_csv,
-        start=start,
-        end=end,
-        datetime_column=benchmark_datetime_column,
-        value_columns=benchmark_value_columns,
-        frequency=frequency,
-        series_name="benchmarked",
-    )
+    series_data = {}
+    if high_frequency_csv is not None and high_frequency_columns is not None:
+        original = build_resampled_series(
+            csv_file=high_frequency_csv,
+            start=start,
+            end=end,
+            datetime_column=high_frequency_datetime_column,
+            value_columns=high_frequency_columns,
+            frequency=frequency,
+            series_name="original",
+        )
+        series_data["original"] = original
 
-    common_index = original.index.union(target.index).union(benchmarked.index).sort_values()
+    series_data[kind_of_csv.name] = adjusted
+    series_data["target"] = target
 
-    original = original.reindex(common_index)
-    target = target.reindex(common_index)
-    benchmarked = benchmarked.reindex(common_index)
+    common_index = None
+    for s in series_data.values():
+        common_index = s.index if common_index is None else common_index.union(s.index)
+    common_index = common_index.sort_values()
 
-    check = pd.DataFrame(
-        {
-            "original": original,
-            "target": target,
-            "benchmarked": benchmarked,
-        }
-    )
+    for key in list(series_data):
+        series_data[key] = series_data[key].reindex(common_index)
 
-    check["original_minus_target"] = check["original"] - check["target"]
-    check["benchmarked_minus_original"] = check["benchmarked"] - check["original"]
-    check["benchmarked_minus_target"] = check["benchmarked"] - check["target"]
+
+    check = pd.DataFrame(series_data)
+    check.index.name = "DateTime"
+    if "original" in check.columns:
+        check["original_minus_target"] = check["original"] - check["target"]
+        check[f"{kind_of_csv.name}_minus_original"] = check[kind_of_csv.name] - check["original"]
+    check[f"{kind_of_csv.name}_minus_target"] = check[kind_of_csv.name] - check["target"]
 
     return check
+
+
+def build_before_after_table(
+    csv_file: Path,
+    start: pd.Timestamp,
+    end: pd.Timestamp,
+    datetime_column: str,
+    original_columns: list[str],
+    adjusted_columns: list[str],
+) -> pd.DataFrame:
+    """
+    """
+    df = pd.read_csv(
+        csv_file,
+        parse_dates=[datetime_column],
+        index_col=datetime_column,
+    )
+    df = df.loc[start:end].copy()
+
+    missing_original = [c for c in original_columns if c not in df.columns]
+    missing_adjusted = [c for c in adjusted_columns if c not in df.columns]
+
+    if missing_original:
+        raise ValueError(f"Missing original columns in {csv_file}: {missing_original}")
+    if missing_adjusted:
+        raise ValueError(f"Missing adjusted columns in {csv_file}: {missing_adjusted}")
+
+    for col in original_columns + adjusted_columns:
+        df[col] = pd.to_numeric(df[col], errors="coerce")
+
+    original = df[original_columns].sum(axis=1)
+    adjusted = df[adjusted_columns].sum(axis=1)
+
+    out = pd.DataFrame(
+        {
+            "original": original,
+            "adjusted": adjusted,
+        }
+    )
+    out.index.name = datetime_column
+    return out

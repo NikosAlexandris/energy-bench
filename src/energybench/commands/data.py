@@ -1,14 +1,11 @@
 from __future__ import annotations
-
 from pathlib import Path
-
 from cyclopts import App
-
 from energybench.io.fetch_swissgrid import fetch_swissgrid_excels
 from energybench.io.clean_swissgrid import process_excel_files
 
 
-app = App(help="Fetch and clean Swissgrid Excel data.")
+app = App(name="data", help="Fetch and clean Swissgrid Excel data.")
 
 
 @app.command(name="fetch-swissgrid")

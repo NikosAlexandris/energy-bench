@@ -1,0 +1,41 @@
+Bias Detection Analysis for nuclear
+============================================================
+Overall Bias: +0.88%
+Overall MAE: 1.2296
+Overall RMSE: 3.2928
+
+Detected 6 changepoints
+Identified 3 distinct bias patterns
+Generated 2 subperiod recommendations
+
+Top Recommendations:
+------------------------------------------------------------
+1. 2016-01-01 to 2016-04-29: benchmarking (confidence: 75.0%)
+   Reason: Low correlation (0.20) suggests shape mismatch
+
+2. 2016-07-22 to 2026-01-11: advanced_scaling (confidence: 70.0%)
+   Reason: Moderate bias with good correlation - advanced scaling recommended
+
+
+======================================================================
+DETAILED RECOMMENDATIONS
+======================================================================
+
+1. Period: 2016-01-01 to 2016-04-29
+   Method: benchmarking
+   Confidence: 75.0%
+   Reason: Low correlation (0.20) suggests shape mismatch
+   Expected improvements:
+     - bias_reduction_pct: 0.0%
+     - mae_reduction_pct: 50.0%
+     - rmse_reduction_pct: 45.0%
+
+2. Period: 2016-07-22 to 2026-01-11
+   Method: advanced_scaling
+   Confidence: 70.0%
+   Reason: Moderate bias with good correlation - advanced scaling recommended
+   Expected improvements:
+     - bias_reduction_pct: 0.9%
+     - mae_reduction_pct: 30.0%
+     - rmse_reduction_pct: 25.0%
+

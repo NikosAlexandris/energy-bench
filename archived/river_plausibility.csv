@@ -1,0 +1,5 @@
+variable,negative_count,missing_count,zero_count,max_ramp,mean_ramp,ramp_exceeds_threshold
+river_high_frequency_original_gwh,0,23,0,2.5066800000000002,0.015273653347945204,
+river_benchmarked_gwh,0,0,0,2.3075854314589543,0.024462227569695256,
+hour,0,0,1096,23.0,1.9158651104436757,
+month,0,0,0,11.0,0.0020910162338896704,

@@ -1,10 +1,9 @@
 from __future__ import annotations
-
 from pathlib import Path
 import pandas as pd
 from cyclopts import App
-
 from energybench.describe.statistics import describe_wide_csv
+
 
 app = App(name="stats", help="Descriptive statistics.")
 

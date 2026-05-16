@@ -1,0 +1,9 @@
+#!/usr/bin/mlr -s
+--c2x
+--ofmt '%.2f'
+cut -f benchmarked,benchmarked_minus_original \
+then put '$Relative_difference = $benchmarked_minus_original / $benchmarked' \
+then stats1 -a min,mean,median,p5,p95,stddev -f
+benchmarked_minus_original,Relative_difference \
+then label "Minimum d_t","Mean d_t","Median d_t","P5 of d_t","P95 of
+d_t","StdDev of d_t","Minimum rd_t","Mean rd_t","Median rd_t","P5 of rd_t","P95 of rd_t","StdDev of rd_t" 

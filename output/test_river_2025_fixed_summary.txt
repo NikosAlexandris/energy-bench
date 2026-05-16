@@ -1,0 +1,41 @@
+Bias Detection Analysis for river
+============================================================
+Overall Bias: -11.26%
+Overall MAE: 5.0878
+Overall RMSE: 8.1615
+
+Detected 1 changepoints
+Identified 3 distinct bias patterns
+Generated 2 subperiod recommendations
+
+Top Recommendations:
+------------------------------------------------------------
+1. 2025-01-01 to 2025-06-04: scaling (confidence: 85.0%)
+   Reason: Low bias and high correlation - simple scaling sufficient
+
+2. 2025-06-04 to 2026-01-09: advanced_scaling (confidence: 70.0%)
+   Reason: Moderate bias with good correlation - advanced scaling recommended
+
+
+======================================================================
+DETAILED RECOMMENDATIONS
+======================================================================
+
+1. Period: 2025-01-01 to 2025-06-04
+   Method: scaling
+   Confidence: 85.0%
+   Reason: Low bias and high correlation - simple scaling sufficient
+   Expected improvements:
+     - bias_reduction_pct: 3.7%
+     - mae_reduction_pct: 30.0%
+     - rmse_reduction_pct: 25.0%
+
+2. Period: 2025-06-04 to 2026-01-09
+   Method: advanced_scaling
+   Confidence: 70.0%
+   Reason: Moderate bias with good correlation - advanced scaling recommended
+   Expected improvements:
+     - bias_reduction_pct: 13.7%
+     - mae_reduction_pct: 30.0%
+     - rmse_reduction_pct: 25.0%
+

@@ -2,6 +2,7 @@ from pathlib import Path
 from cyclopts import App
 from pandas import Timestamp
 from energybench.benchmark import benchmark
+from energybench.io.output import save_dataframe, build_filename
 
 
 app = App(help="Benchmark hydro (Flusskraft + Speicherkraft vs ENTSO-E hydro total).")
@@ -41,8 +42,9 @@ def water(
     Low-frequency target:      SFOE Flusskraft + Speicherkraft (daily)
     High-frequency indicator:  ENTSO-E Run-of-river + Reservoir + Pumped Storage (hourly)
     """
-    output_path = benchmark(
-        variable="water",
+    variable = 'water'
+    benchmarked_dataframe = benchmark(
+        variable=variable,
         high_frequency_csv=high_frequency_csv,
         low_frequency_csv=low_frequency_csv,
         start=start,
@@ -53,7 +55,21 @@ def water(
         method=method,
         conversion=conversion,
     )
-    print(f"💾 Output written to {output_path}")
+    filename = build_filename(
+        base_name="hourly_benchmarked",
+        variable=variable,
+        start=start,
+        end=end,
+        suffix=".csv",
+    )
+    
+    save_dataframe(
+        df=benchmarked_dataframe,
+        filename=filename,
+        output_dir=output_dir,
+        variable=variable,
+        index=False,
+    )
 
 
 if __name__ == "__main__":

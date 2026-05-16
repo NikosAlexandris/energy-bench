@@ -1,0 +1,24 @@
+start,end,method,confidence,reason,cluster_id,expected_bias_reduction_pct,expected_mae_reduction_pct,expected_rmse_reduction_pct
+2016-01-01,2016-02-19,benchmarking,0.8,High bias (-33.1%) requires temporal disaggregation,,29.81380164356769,50.0,45.0
+2016-04-22,2016-05-27,benchmarking,0.8,High bias (-54.6%) requires temporal disaggregation,,49.17507260293277,50.0,45.0
+2016-05-27,2016-07-29,benchmarking,0.8,High bias (-38.9%) requires temporal disaggregation,,34.97591337871961,50.0,45.0
+2016-09-09,2017-07-07,benchmarking,0.8,High bias (-27.5%) requires temporal disaggregation,,24.712209200424365,50.0,45.0
+2017-09-01,2017-12-15,benchmarking,0.8,High bias (-29.1%) requires temporal disaggregation,,26.18133417052257,50.0,45.0
+2019-09-13,2020-04-17,benchmarking,0.8,High bias (-22.2%) requires temporal disaggregation,,19.974806963115746,50.0,45.0
+2020-09-18,2021-07-09,benchmarking,0.8,High bias (-23.0%) requires temporal disaggregation,,20.656735815247938,50.0,45.0
+2021-07-09,2022-04-22,benchmarking,0.8,High bias (-25.4%) requires temporal disaggregation,,22.89299748760932,50.0,45.0
+2022-09-16,2022-10-28,benchmarking,0.8,High bias (-23.5%) requires temporal disaggregation,,21.1845762900288,50.0,45.0
+2022-10-28,2022-12-16,benchmarking,0.8,High bias (-26.3%) requires temporal disaggregation,,23.673683720068755,50.0,45.0
+2022-12-30,2023-03-10,benchmarking,0.8,High bias (-24.0%) requires temporal disaggregation,,21.622797001124724,50.0,45.0
+2023-03-10,2023-07-28,benchmarking,0.8,High bias (-27.4%) requires temporal disaggregation,,24.633763592486687,50.0,45.0
+2016-08-05,2016-09-09,advanced_scaling,0.7,Moderate bias with good correlation - advanced scaling recommended,,13.128401379133638,30.0,25.0
+2017-07-07,2017-09-01,advanced_scaling,0.7,Moderate bias with good correlation - advanced scaling recommended,,15.488557156449303,30.0,25.0
+2017-12-29,2018-09-21,advanced_scaling,0.7,Moderate bias with good correlation - advanced scaling recommended,,14.564023033565347,30.0,25.0
+2018-09-21,2018-11-02,advanced_scaling,0.7,Moderate bias with good correlation - advanced scaling recommended,,8.881236068606452,30.0,25.0
+2018-11-02,2019-02-08,advanced_scaling,0.7,Moderate bias with good correlation - advanced scaling recommended,,16.250767580082137,30.0,25.0
+2019-03-08,2019-05-17,advanced_scaling,0.7,Moderate bias with good correlation - advanced scaling recommended,,17.991005900590764,30.0,25.0
+2019-05-17,2019-09-06,advanced_scaling,0.7,Moderate bias with good correlation - advanced scaling recommended,,5.8134691675604735,30.0,25.0
+2020-04-17,2020-09-18,advanced_scaling,0.7,Moderate bias with good correlation - advanced scaling recommended,,13.362408404213356,30.0,25.0
+2022-04-22,2022-09-09,advanced_scaling,0.7,Moderate bias with good correlation - advanced scaling recommended,,16.59101072422004,30.0,25.0
+2023-07-28,2025-07-18,advanced_scaling,0.7,Moderate bias with good correlation - advanced scaling recommended,,16.280651250058213,30.0,25.0
+2025-07-18,2026-01-11,advanced_scaling,0.7,Moderate bias with good correlation - advanced scaling recommended,,13.67085284840619,30.0,25.0

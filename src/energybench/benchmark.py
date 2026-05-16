@@ -1,33 +1,16 @@
 from pathlib import Path
 
 import pandas as pd
-from pandas import Timestamp
+from pandas import DataFrame, Timestamp
 from tempdisagg import TempDisaggModel
 
-from energybench.helpers import prepare_dataframe
-from energybench.read import read_csv
+from energybench.helpers import prepare_dataframe, sum_columns
+from energybench.io.input import read_csv
 from energybench.variables import get_variable_config
 
 
 pd.options.mode.copy_on_write = True  # faster pandas
 pd.options.future.infer_string = True
-
-
-def _sum_columns(
-        df: pd.DataFrame,
-        columns: list[str],
-        series_name: str,
-) -> pd.Series:
-    """
-    """
-    missing = [col for col in columns if col not in df.columns]
-    if missing:
-        raise ValueError(f"Missing columns for '{series_name}': {missing}")
-
-    out = df[columns].sum(axis=1)
-    out.name = series_name
-
-    return out
 
 
 def benchmark(
@@ -41,66 +24,118 @@ def benchmark(
     output_dir: Path = Path("output"),
     method: str = "chow-lin",
     conversion: str = "sum",
-) -> Path:
+) -> DataFrame:
     """
+    Benchmark high-frequency indicator series using temporal disaggregation.
+
+    This function reconciles high-frequency time series data with low-frequency
+    target values using temporal disaggregation methods. It ensures that the
+    high-frequency estimates sum to match the low-frequency totals while
+    preserving temporal patterns from the indicator series.
+
+    The function is source-agnostic and works with any time series data sources.
+
+    Args:
+        variable: Energy type to benchmark (e.g., "nuclear", "river", "solar")
+        high_frequency_csv: Path to high-frequency indicator CSV (e.g., ENTSO-E hourly)
+        low_frequency_csv: Path to low-frequency target CSV (e.g., SFOE daily)
+        start: Start timestamp for analysis period
+        end: End timestamp for analysis period
+        high_frequency_datetime_column: Name of datetime column in indicator CSV
+        low_frequency_datetime_column: Name of datetime column in target CSV
+        output_dir: Directory for output files
+        method: Temporal disaggregation method ("chow-lin", "denton", "ensemble", etc.)
+        conversion: Conversion type ("sum" for flow variables, "average" for stock variables)
+
+    Returns:
+        DataFrame with benchmarked hourly values and metadata
+
+    Examples:
+        >>> # Benchmark nuclear generation using ENTSO-E and SFOE
+        >>> result = benchmark(
+        ...     variable="nuclear",
+        ...     high_frequency_csv=Path("data/entsoe_hourly.csv"),
+        ...     low_frequency_csv=Path("data/sfoe_daily.csv"),
+        ...     start=pd.Timestamp("2025-01-01"),
+        ...     end=pd.Timestamp("2025-12-31"),
+        ... )
+
+        >>> # Use ensemble method for better accuracy
+        >>> result = benchmark(
+        ...     variable="solar",
+        ...     high_frequency_csv=Path("data/entsoe_hourly.csv"),
+        ...     low_frequency_csv=Path("data/sfoe_daily.csv"),
+        ...     start=pd.Timestamp("2025-01-01"),
+        ...     end=pd.Timestamp("2025-12-31"),
+        ...     method="ensemble",
+        ... )
     """
     cfg = get_variable_config(variable)
     output_dir.mkdir(parents=True, exist_ok=True)
 
-    low_frequency_series = read_csv(
+    # Read low-frequency target data
+    target_data = read_csv(
         source=low_frequency_csv,
         start=start.normalize(),
         end=end.normalize(),
         time_column=low_frequency_datetime_column,
+        columns=[low_frequency_datetime_column] + cfg["target_types_present"],
     )
-    low_frequency_series = low_frequency_series.loc[start.normalize():end.normalize()]
-    low_frequency_target = _sum_columns(low_frequency_series, cfg["target_columns"], "target")
 
-    high_frequency_series = read_csv(
+    target_series = sum_columns(
+        df=target_data, columns=cfg["target_types_present"], output_name="target"
+    )
+
+    # Read high-frequency indicator data
+    indicator_data = read_csv(
         source=high_frequency_csv,
         start=start,
         end=end,
         time_column=high_frequency_datetime_column,
+        columns=[high_frequency_datetime_column] + cfg["indicator_types_present"],
     )
-    high_frequency_indicator = _sum_columns(high_frequency_series, cfg["indicator_columns"], "indicator")
 
+    indicator_series = sum_columns(
+        df=indicator_data, columns=cfg["indicator_types_present"], output_name="indicator"
+    )
+
+    # Prepare data for temporal disaggregation
     df = prepare_dataframe(
-        low_frequency_target=low_frequency_target,
-        high_frequency_indicator=high_frequency_indicator,
+        target_series=target_series,
+        indicator_series=indicator_series,
     )
     model = TempDisaggModel(method=method, conversion=conversion)
     model.fit(df)
 
     print(model.summary())
-    if method == 'ensemble':
+    if method == "ensemble":
         print(
-                f"\n Overview :"
-                f"\n- Each method is fitted separately"
-                f"\n- Error metrics (e.g. MAE) are computed"
-                f"\n- Weights are optimized to minimize global error"
-                f"\n- Final prediction is a weighted average across models"
-                f"\n"
+            "\n Overview :"
+            "\n- Each method is fitted separately"
+            "\n- Error metrics (e.g. MAE) are computed"
+            "\n- Weights are optimized to minimize global error"
+            "\n- Final prediction is a weighted average across models"
+            "\n"
         )
 
     benchmarked_values = model.predict().flatten()
     hourly_index = pd.date_range(start, periods=len(benchmarked_values), freq="h")
 
-    out = pd.DataFrame({
-        "DateTime": hourly_index,
-        cfg["original_column"]: high_frequency_indicator.reindex(hourly_index).values,
-        cfg["output_column"]: benchmarked_values,
-    })
-    out["date"] = out["DateTime"].dt.date
-    out["hour"] = out["DateTime"].dt.hour
-    out["month"] = out["DateTime"].dt.month
-    out["source_profile"] = "ENTSO-E"
-    out["daily_target_source"] = "SFOE"
-    out["variable"] = cfg["label"]
-    out["target_columns"] = ", ".join(cfg["target_columns"])
-    out["indicator_columns"] = ", ".join(cfg["indicator_columns"])
-    out["kind"] = cfg.get("kind", "unknown")
+    output_dataframe = pd.DataFrame(
+        {
+            "DateTime": hourly_index,
+            cfg["original_column"]: indicator_series.reindex(hourly_index).values,
+            cfg["output_column"]: benchmarked_values,
+        }
+    )
+    output_dataframe["date"] = output_dataframe["DateTime"].dt.date
+    output_dataframe["hour"] = output_dataframe["DateTime"].dt.hour
+    output_dataframe["month"] = output_dataframe["DateTime"].dt.month
+    output_dataframe["variable"] = cfg["label"]
+    output_dataframe["indicator_source"] = "ENTSO-E"
+    output_dataframe["indicator_type"] = ", ".join(cfg["indicator_type"])
+    output_dataframe["target_source"] = "SFOE"
+    output_dataframe["target_type"] = ", ".join(cfg["target_type"])
+    output_dataframe["kind"] = cfg.get("kind", "unknown")
 
-    output_path = output_dir / cfg["output_filename"]
-    out.to_csv(output_path, index=False, date_format="%Y-%m-%d %H:%M:%S")
-
-    return output_path
+    return output_dataframe

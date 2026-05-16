@@ -1,26 +1,177 @@
 import pandas as pd
 import numpy as np
+import warnings
+
+
+def sum_columns(
+    df: pd.DataFrame,
+    columns: list[str],
+    output_name: str,
+    factor: float = 1.0,
+    strict: bool = False,
+) -> pd.Series:
+    """
+    Sum specified columns, handling missing columns gracefully.
+
+    This function sums the specified columns from a DataFrame, automatically
+    handling missing columns based on the strict parameter. It's designed to
+    work with any time series data sources.
+
+    Args:
+        df: Input DataFrame containing the columns to sum
+        columns: List of column names to sum
+        output_name: Name for the output Series
+        factor: Multiplicative factor applied to the sum (e.g., for unit conversion).
+                Default is 1.0 (no scaling).
+        strict: If True, raises ValueError when any columns are missing.
+                If False (default), warns about missing columns and continues with available ones.
+
+    Returns:
+        pd.Series: Series with summed values, named according to output_name
+
+    Raises:
+        ValueError: If no columns are found (always), or if strict=True and any columns are missing
+
+    Examples:
+        >>> # Sum ENTSO-E indicator columns
+        >>> indicator = sum_columns(
+        ...     df=entsoe_data,
+        ...     columns=["Nuclear", "Hydro Run-of-river"],
+        ...     output_name="total_generation"
+        ... )
+
+        >>> # Sum with unit conversion (MW to GWh)
+        >>> target = sum_columns(
+        ...     df=sfoe_data,
+        ...     columns=["Kernkraft", "Flusskraft"],
+        ...     output_name="daily_total",
+        ...     factor=0.001
+        ... )
+
+        >>> # Strict mode - raise error if columns missing
+        >>> result = sum_columns(
+        ...     df=data,
+        ...     columns=["Required1", "Required2"],
+        ...     output_name="result",
+        ...     strict=True
+        ... )
+    """
+    available = [c for c in columns if c in df.columns]
+    missing = [c for c in columns if c not in df.columns]
+
+    if not available:
+        raise ValueError(
+            f"No columns found for '{output_name}'. "
+            f"Expected columns: {columns}, "
+            f"Available in DataFrame: {list(df.columns)}"
+        )
+
+    if missing:
+        if strict:
+            raise ValueError(
+                f"Missing required columns for '{output_name}': {missing}. "
+                f"Available columns: {available}"
+            )
+        else:
+            print(f"⚠️  Warning: missing columns for '{output_name}': {missing}")
+            print(f"   Using available columns: {available}")
+
+    # Convert to numeric and sum, handling non-numeric values gracefully
+    out = df[available].apply(pd.to_numeric, errors="coerce").sum(axis=1) * factor
+    out.name = output_name
+
+    return out
+
+
+def safe_sum_series(
+    df: pd.DataFrame,
+    value_columns: list[str],
+    series_name: str,
+) -> pd.Series:
+    """
+    DEPRECATED: Use sum_columns() instead.
+
+    This function is deprecated and will be removed in v2.0.0.
+    Use sum_columns() with the same parameters instead.
+
+    Args:
+        df: Input DataFrame
+        value_columns: List of column names to sum
+        series_name: Name for output Series
+
+    Returns:
+        pd.Series: Summed series
+
+    Example:
+        >>> # Old way (deprecated)
+        >>> result = safe_sum_series(df, ["col1", "col2"], "total")
+
+        >>> # New way (recommended)
+        >>> result = sum_columns(df, ["col1", "col2"], "total")
+    """
+    warnings.warn(
+        "safe_sum_series() is deprecated and will be removed in v2.0.0. "
+        "Use sum_columns(df, columns, output_name) instead.",
+        DeprecationWarning,
+        stacklevel=2,
+    )
+    return sum_columns(
+        df=df, columns=value_columns, output_name=series_name, factor=1.0, strict=False
+    )
 
 
 def prepare_dataframe(
-    low_frequency_target: pd.Series,
-    high_frequency_indicator: pd.Series,
+    target_series: pd.Series,
+    indicator_series: pd.Series,
 ) -> pd.DataFrame:
     """
-    Convert low-frequency target series and high-frequency indicator series to
-    a `tempdisagg` compatible input format.
+    Convert target and indicator series to tempdisagg-compatible format.
+
+    This function prepares time series data for temporal disaggregation by
+    converting low-frequency target values and high-frequency indicator values
+    into the format required by the tempdisagg library.
+
+    The function is source-agnostic and works with any time series data:
+    - Target: Low-frequency reference values (e.g., daily, weekly)
+    - Indicator: High-frequency values to be adjusted (e.g., hourly, 15-min)
+
+    Args:
+        target_series: Low-frequency reference series (e.g., SFOE daily totals)
+                      Index must be datetime-like at low frequency
+        indicator_series: High-frequency indicator series (e.g., ENTSO-E hourly)
+                         Index must be datetime-like at high frequency
+
+    Returns:
+        pd.DataFrame: DataFrame in tempdisagg format with columns:
+            - Index: Date identifier (YYYYMMDD format)
+            - Grain: Hour of day (1-24)
+            - y: Target values (daily totals)
+            - X: Indicator values (hourly)
+
+    Examples:
+        >>> # ENTSO-E hourly vs SFOE daily
+        >>> df = prepare_dataframe(
+        ...     target_series=sfoe_daily,
+        ...     indicator_series=entsoe_hourly
+        ... )
+
+        >>> # Swissgrid 15-min vs SFOE daily
+        >>> df = prepare_dataframe(
+        ...     target_series=sfoe_daily,
+        ...     indicator_series=swissgrid_15min
+        ... )
     """
-    low_frequency_target = low_frequency_target.copy()
-    high_frequency_indicator = high_frequency_indicator.copy()
+    target_series = target_series.copy()
+    indicator_series = indicator_series.copy()
 
-    # Ensure time series feature a DatetimeIndex
-    if not isinstance(low_frequency_target.index, pd.DatetimeIndex):
-        low_frequency_target.index = pd.to_datetime(low_frequency_target.index)
+    # Ensure time series have DatetimeIndex
+    if not isinstance(target_series.index, pd.DatetimeIndex):
+        target_series.index = pd.to_datetime(target_series.index)
 
-    if not isinstance(high_frequency_indicator.index, pd.DatetimeIndex):
-        high_frequency_indicator.index = pd.to_datetime(high_frequency_indicator.index)
+    if not isinstance(indicator_series.index, pd.DatetimeIndex):
+        indicator_series.index = pd.to_datetime(indicator_series.index)
 
-    dates = low_frequency_target.index.normalize().date
+    dates = target_series.index.normalize().date
     hourly_index = pd.date_range(
         start=dates[0],
         end=dates[-1] + pd.Timedelta("23h"),
@@ -37,16 +188,12 @@ def prepare_dataframe(
 
     # Set daily constraints as DAILY TOTALS (not divided by 24)
     daily_map = {
-        d.year * 10000 + d.month * 100 + d.day: v
-        for d, v in zip(dates, low_frequency_target.values)
+        d.year * 10000 + d.month * 100 + d.day: v for d, v in zip(dates, target_series.values)
     }
     df["y"] = df["Index"].map(daily_map)
 
-    # High-freq indicator X
-    high_resampled = high_frequency_indicator.reindex(
-        hourly_index,
-        method="nearest"
-    ).ffill().bfill()
-    df["X"] = high_resampled.values
+    # Resample indicator to hourly frequency
+    indicator_resampled = indicator_series.reindex(hourly_index, method="nearest").ffill().bfill()
+    df["X"] = indicator_resampled.values
 
     return df

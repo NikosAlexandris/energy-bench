@@ -1,187 +1,218 @@
-from pathlib import Path
 import matplotlib.pyplot as plt
-from matplotlib.ticker import MultipleLocator
-import matplotlib.dates as mdates
 from pandas import DataFrame
+import pandas as pd
+import matplotlib.dates as mdates
+from pathlib import Path
+
+
+SWISS_RED = "#B55A52"
+SOFT_GREY = "#808080"
+MID_GREY = "0.65"
+
+
+def _text_width_in_figcoords(fig, text_obj, renderer) -> float:
+    bbox = text_obj.get_window_extent(renderer=renderer)
+    fig_width_px = fig.get_figwidth() * fig.dpi
+    return bbox.width / fig_width_px
 
 
 def plot_series_before_and_after(
     dataframe: DataFrame,
-    original_series: str,
-    adjusted_series: str,
+    original_series: pd.Series,
+    adjusted_series: pd.Series,
     electricity_generation_type: str,
     original_series_label: str | None = None,
     adjusted_series_label: str | None = None,
     data_source: str | None = None,
+    reconstruction_method: str | None = None,
     frequency: str = "hourly",
     units: str = "GWh",
     xlabel: str = "Time",
-    output_directory: Path = Path("output"),
-) -> None:
-    """ """
-    fig, ax = plt.subplots(figsize=(14, 3.5), dpi=150)
+) -> Figure:
+    """
+    """
+    # Series
+    original_series = dataframe[original_series].sort_index()
+    adjusted_series = dataframe[adjusted_series].sort_index()
 
-    # Tufte: thin lines, no grid, minimal margins
-    plt.style.use("default")
-    ax.spines["top"].set_visible(False)
-    ax.spines["right"].set_visible(False)
-    ax.spines["left"].set_linewidth(0.5)
-    ax.spines["bottom"].set_linewidth(0.5)
-
-    # Plot lines
-    original_series_label = (
-        original_series_label or f"Original {data_source or 'high-frequency'}"
-    )
-    # original_series_label = original_series_label or (
-    # f"Original {electricity_generation_type.lower()} {frequency} series" + 
-    # (f" ({data_source})" if data_source else "")
-    # )
-    adjusted_series_label = adjusted_series_label or "Benchmarked"  # f"Adjusted {electricity_generation_type.lower()} {frequency} series"
-
-    dataframe[original_series].plot(
-        ax=ax, color="#1f77b4", linewidth=1.2, alpha=0.85, label=original_series_label
-    )
-    dataframe[adjusted_series].plot(
-        ax=ax, color="#ff7f0e", linewidth=1.8, alpha=1.0, label=adjusted_series_label
+    # Configure the figure
+    fig, ax = plt.subplots(
+        1,
+        1,
+        figsize=(11, 3.2),
+        gridspec_kw={"hspace": 0.04},
     )
 
-    # Tufte typography: no bold title, smaller labels
-    ax.set_title(
-    # f"Original vs Adjusted {electricity_generation_type} {frequency} profile",
-        f"{electricity_generation_type} ({frequency})",
-        fontsize=14,
-        fontweight="normal",
-        pad=10,
-    )
-    ax.set_ylabel(units, fontsize=12)
-    ax.set_xlabel(xlabel, fontsize=11)
 
-    # Minimal ticks
-    ax.tick_params(axis="both", which="major", labelsize=10)
-    ax.xaxis.set_major_locator(MultipleLocator(24))  # Daily ticks for hourly data
-
-    # Legend: outside plot area
-    ax.legend(loc="upper left", frameon=False, fontsize=10)
-
-    # Tight layout with minimal margins
-    plt.subplots_adjust(left=0.08, right=0.98, top=0.92, bottom=0.12)
-
-    output_directory.mkdir(parents=True, exist_ok=True)
-    output_filename = (
-        f"{electricity_generation_type.lower()}_before_after_{frequency}.png"
-    )
-    output_path = output_directory / output_filename
-    plt.savefig(
-        output_path,
-        dpi=150,
-        bbox_inches="tight",
-        facecolor="white",
-        edgecolor="none",
-        pad_inches=0.1,
-    )
-    plt.close()
-
-    print(f"💾 Plot saved as '{output_path}'")
-
-
-
-def plot_series_before_and_after(
-    dataframe: DataFrame,
-    original_series: str,
-    adjusted_series: str,
-    electricity_generation_type: str,
-    original_series_label: str | None = None,
-    adjusted_series_label: str | None = None,
-    data_source: str | None = None,
-    frequency: str = "hourly",
-    units: str = "GWh",
-    xlabel: str = "Time",
-    output_directory: Path = Path("output"),
-) -> None:
-    fig, ax = plt.subplots(figsize=(14, 3.8), dpi=150)
-
-    original_series_label = original_series_label or (
-        f"Original {electricity_generation_type.lower()} {frequency} series"
-        + (f" ({data_source})" if data_source else "")
-    )
-    adjusted_series_label = adjusted_series_label or (
-        f"Adjusted {electricity_generation_type.lower()} {frequency} series"
-    )
-
+    # Minimal axis styling
     ax.spines["top"].set_visible(False)
     ax.spines["right"].set_visible(False)
     ax.spines["left"].set_linewidth(0.6)
     ax.spines["bottom"].set_linewidth(0.6)
-
-    ax.plot(
-        dataframe.index,
-        dataframe[original_series],
-        # color="0.55",
-        linewidth=0.9,
-        alpha=0.7,
-        label=original_series_label,
-        zorder=2,
-    )
-    ax.plot(
-        dataframe.index,
-        dataframe[adjusted_series],
-        # color="0.10",
-        linewidth=1.2,
-        alpha=0.8,
-        label=adjusted_series_label,
-        zorder=3,
-    )
-
-    fig.suptitle(
-        f"{electricity_generation_type} {frequency} profile",
-        x=0.08,
-        y=0.85,
-        ha="left",
-        fontsize=12,
-        fontweight="normal",
-    )
-
-
-
-    ax.set_ylabel(units, fontsize=10)
-    ax.set_xlabel(xlabel, fontsize=10)
+    ax.spines["left"].set_color("0.35")
+    ax.spines["bottom"].set_color("0.35")
+    ax.tick_params(axis="both", labelsize=9, colors="0.25", length=3, width=0.6)
     ax.grid(False)
 
-    locator = mdates.AutoDateLocator(minticks=4, maxticks=8)
-    formatter = mdates.ConciseDateFormatter(locator)
-    ax.xaxis.set_major_locator(locator)
-    ax.xaxis.set_major_formatter(formatter)
-
-    ax.minorticks_off()
-    ax.tick_params(axis="x", which="major", labelsize=9, length=3, width=0.6, colors="0.25")
-    ax.tick_params(axis="y", which="major", labelsize=9, length=3, width=0.6, colors="0.25")
-
-    ax.legend(
-        loc="lower left",
-        bbox_to_anchor=(0.0, 1.01),
-        frameon=False,
-        ncol=2,
-        fontsize=9,
-        handlelength=2.8,
-        borderaxespad=0.0,
-        columnspacing=1.5,
+    # First the low-frequency series
+    # Daily target in muted Swiss red, fine dashed
+    ax.plot(
+        adjusted_series.index,
+        adjusted_series.values,
+        # where="mid",
+        color=SWISS_RED,
+        linewidth=0.5,
+        alpha=0.9,
     )
 
-    ax.margins(x=0.01)
-
-    plt.tight_layout(rect=(0, 0, 1, 0.92))
-
-    output_directory.mkdir(parents=True, exist_ok=True)
-    output_filename = f"{electricity_generation_type.lower()}_before_after_{frequency}.png"
-    output_path = output_directory / output_filename
-    plt.savefig(
-        output_path,
-        dpi=150,
-        bbox_inches="tight",
-        facecolor="white",
-        edgecolor="none",
-        pad_inches=0.08,
+    # Then the high-frequency series
+    # Top: benchmarked hourly
+    ax.plot(
+        original_series.index,
+        original_series.values,
+        color="#C7C7C7",
+        linewidth=0.5,
     )
-    plt.close()
 
-    print(f"Plot saved as '{output_path}'")
+    # Mark missing values with red dots
+    import numpy as np
+    missing_mask = original_series.isna()
+    if missing_mask.any():
+        missing_label=f'Missing ({missing_mask.sum()} points)'
+        ax.scatter(original_series.index[missing_mask],
+                   np.full(missing_mask.sum(), original_series.min()),
+                   color='red', marker='o', s=50,
+                   # label=f'Missing ({missing_mask.sum()} points)',
+                   zorder=5,
+                )
+
+    ax.set_ylabel(units, fontsize=9, color="0.2")
+    ax.tick_params(axis="x", length=0)
+    # ax.spines["bottom"].set_visible(False)
+
+    title_y = 0.965
+    subtitle_y = 0.918
+
+    before_label = original_series_label or "Original"
+    after_label = adjusted_series_label or data_source or "Adjusted"
+    if reconstruction_method:
+        after_label += f" via {reconstruction_method}"
+
+    x0 = 0.08
+    gap = 0.008  # figure-coordinate gap
+    title_fontsize = 12
+
+    title = f"{electricity_generation_type} {frequency} profile"
+
+    # Title
+    title = fig.text(
+        x=x0,
+        y=title_y,
+        s=title,
+        ha="left",
+        va="top",
+        fontsize=title_fontsize,
+        color="0.1",
+    )
+
+    # Force a draw so text extents are available
+    fig.canvas.draw()
+    renderer = fig.canvas.get_renderer()
+    title_width = _text_width_in_figcoords(fig, title, renderer)
+
+    # Temporal coverage
+    start_candidates = []
+    end_candidates = []
+
+    if len(original_series.index) > 0:
+        start_candidates.append(pd.Timestamp(original_series.index.min()))
+        end_candidates.append(pd.Timestamp(original_series.index.max()))
+
+    if len(adjusted_series.index) > 0:
+        start_candidates.append(pd.Timestamp(adjusted_series.index.min()))
+        end_candidates.append(pd.Timestamp(adjusted_series.index.max()))
+
+    if start_candidates and end_candidates:
+        start_year = min(start_candidates).year
+        end_year = max(end_candidates).year
+        if not start_year == end_year:
+            temporal_coverage_label = f"{start_year}·{end_year}"
+        else:
+            temporal_coverage_label = start_year
+
+    else:
+        temporal_coverage_label = ""
+
+    temporal_coverage_label_x = x0 + title_width + gap
+
+    fig.text(
+        x=temporal_coverage_label_x,
+        y=title_y,
+        s=temporal_coverage_label,
+        ha="left",
+        va="top",
+        fontsize=title_fontsize,
+        color="0.2",
+    )
+
+   # First label
+    label_1 = fig.text(
+        x0, subtitle_y,
+        f"— {before_label}",
+        ha="left",
+        va="top",
+        fontsize=8,
+        color=SOFT_GREY,
+    )
+
+    fig.canvas.draw()
+    renderer = fig.canvas.get_renderer()
+    label_1_width = _text_width_in_figcoords(fig, label_1, renderer)
+
+    # Second label
+    label_2_x = x0 + label_1_width + gap
+    label_2 = fig.text(
+        label_2_x, subtitle_y,
+        f"— {after_label}",
+        ha="left",
+        va="top",
+        fontsize=8,
+        color=SWISS_RED,
+    )
+
+    fig.canvas.draw()
+    renderer = fig.canvas.get_renderer()
+    label_2_width = _text_width_in_figcoords(fig, label_2, renderer)
+    missing_label_x = label_2_x + label_2_width + gap
+    if missing_mask.any():
+        fig.text(
+                missing_label_x, subtitle_y,
+            f"o {missing_label}",
+            ha="left",
+            va="top",
+            fontsize=8,
+            color=SWISS_RED,
+        )
+
+    if not original_series_label and not adjusted_series_label:
+        # Colored subtitle row
+        fig.text(
+            0.08, subtitle_y,
+            data_source or original_series_label,
+            ha="left",
+            va="top",
+            fontsize=8,
+            color="#7A7A7A",   # Original series
+        )
+
+        fig.text(
+            0.22, subtitle_y,
+            data_source or adjusted_series_label,
+            ha="left",
+            va="top",
+            fontsize=8,
+            color=SWISS_RED,   # Adjusted series
+        )
+    fig.subplots_adjust(left=0.08, right=0.98, top=0.88, bottom=0.10)
+
+    return fig
