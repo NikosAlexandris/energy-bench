@@ -28,8 +28,8 @@ def list_types() -> None:
     for key, cfg in VARIABLES.items():
         table.add_row(
             key,
-            ", ".join(cfg["sfoe_types"]),
-            ", ".join(cfg["entsoe_types"]),
+            ", ".join(cfg["target_types"]),
+            ", ".join(cfg["indicator_types"]),
         )
 
     console.print(table)
