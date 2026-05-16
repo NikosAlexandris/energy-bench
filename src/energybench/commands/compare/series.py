@@ -3,6 +3,7 @@ from pathlib import Path
 from pandas import Timestamp, DataFrame
 from energybench.compare.specifications import COMPARISON_SPECS
 from energybench.compare.shape import compare_intraday_shape, compute_comparison_row
+from energybench.helpers import sum_columns
 from energybench.io.input import read_csv
 from energybench.print.metrics import print_metrics
 from energybench.io.output import save_dataframe
@@ -19,16 +20,16 @@ def compare_series_shape(
     self_test: bool = False,
 ):
     """
-    Compare ENTSO-E hourly series against SFOE daily series expanded to flat hourly.
+    Compare hourly indicator series against daily target series expanded to flat hourly.
     Optionally export all metrics to a tidy CSV for later plotting.
     """
-    entsoe = read_csv(
+    indicator_data = read_csv(
         high_frequency_csv,
         start=start,
         end=end,
         time_column=high_frequency_datetime_column,
     )
-    sfoe = read_csv(
+    target_data = read_csv(
         low_frequency_csv,
         start=start,
         end=end,
@@ -37,7 +38,7 @@ def compare_series_shape(
 
     if self_test:
         hydro_hourly = sum_columns(
-            entsoe,
+            indicator_data,
             [
                 "Hydro Run-of-river and poundage",
                 "Hydro Water Reservoir",
@@ -52,8 +53,8 @@ def compare_series_shape(
 
     for spec in COMPARISON_SPECS:
         daily_metrics, shape_metrics, row = compute_comparison_row(
-            entsoe=entsoe,
-            sfoe=sfoe,
+            indicator_data=indicator_data,
+            target_data=target_data,
             spec=spec,
             start=start,
             end=end,

@@ -24,7 +24,7 @@ def compare_scaled_vs_target(
     category_name: str | None = None,
 ):
     """
-    Compare scaled hourly series (aggregated to daily) vs SFOE daily targets.
+    Compare scaled hourly series (aggregated to daily) vs daily target targets.
     This validates that the scaling correctly matched the target daily totals.
     """
     cfg = get_variable_config(variable)
@@ -54,7 +54,7 @@ def compare_scaled_vs_target(
     scaled_hourly = scaled_df[scaled_column].loc[start:end].sort_index()
     scaled_daily = scaled_hourly.resample("D").sum()
 
-    # Read SFOE daily targets
+    # Read daily target targets
     target_df = read_csv(
         source=target_csv,
         start=start.normalize(),
@@ -63,6 +63,7 @@ def compare_scaled_vs_target(
         columns=[target_date_column] + cfg["target_types_present"],
     )
     from energybench.helpers import sum_columns
+
     target_daily = sum_columns(target_df, cfg["target_types_present"], "target")
 
     # Compare daily totals
@@ -71,7 +72,7 @@ def compare_scaled_vs_target(
     # Build output row with proper category name
     if category_name is None:
         category_name = f"{variable}_{kind_of_csv.name}_vs_target"
-    
+
     row = {
         "category": category_name,
         "label_daily": f"{category_name} daily validation",

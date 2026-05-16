@@ -5,11 +5,11 @@ from energybench.commands.scale.advanced import scale_high_frequency_series_adva
 
 scale_app = App(
     name="scale",
-    help="Scale high-frequency time series by a factor to match a reference low-frequency time series"
+    help="Scale high-frequency time series by a factor to match a reference low-frequency time series",
 )
 
 scale_app.command(
-    name='simple',
+    name="simple",
     help="",
 )(scale_high_frequency_series)
 scale_app.command(

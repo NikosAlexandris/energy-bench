@@ -169,9 +169,9 @@ def rolling_bias_analysis(
     Parameters
     ----------
     indicator : pd.Series
-        High-frequency indicator series (e.g., ENTSO-E hourly)
+        High-frequency indicator series (e.g., hourly indicator)
     target : pd.Series
-        Low-frequency target series (e.g., SFOE daily)
+        Low-frequency target series (e.g., daily target)
     window_size : str
         Size of rolling window (pandas offset string)
     step_size : str

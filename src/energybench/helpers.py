@@ -33,16 +33,16 @@ def sum_columns(
         ValueError: If no columns are found (always), or if strict=True and any columns are missing
 
     Examples:
-        >>> # Sum ENTSO-E indicator columns
+        >>> # Sum indicator columns
         >>> indicator = sum_columns(
-        ...     df=entsoe_data,
+        ...     df=indicator_data,
         ...     columns=["Nuclear", "Hydro Run-of-river"],
         ...     output_name="total_generation"
         ... )
 
         >>> # Sum with unit conversion (MW to GWh)
         >>> target = sum_columns(
-        ...     df=sfoe_data,
+        ...     df=target_data,
         ...     columns=["Kernkraft", "Flusskraft"],
         ...     output_name="daily_total",
         ...     factor=0.001
@@ -136,9 +136,9 @@ def prepare_dataframe(
     - Indicator: High-frequency values to be adjusted (e.g., hourly, 15-min)
 
     Args:
-        target_series: Low-frequency reference series (e.g., SFOE daily totals)
+        target_series: Low-frequency reference series (e.g., daily totals)
                       Index must be datetime-like at low frequency
-        indicator_series: High-frequency indicator series (e.g., ENTSO-E hourly)
+        indicator_series: High-frequency indicator series (e.g., hourly data)
                          Index must be datetime-like at high frequency
 
     Returns:
@@ -149,16 +149,16 @@ def prepare_dataframe(
             - X: Indicator values (hourly)
 
     Examples:
-        >>> # ENTSO-E hourly vs SFOE daily
+        >>> # Hourly indicator vs daily target
         >>> df = prepare_dataframe(
-        ...     target_series=sfoe_daily,
-        ...     indicator_series=entsoe_hourly
+        ...     target_series=daily_target,
+        ...     indicator_series=hourly_indicator
         ... )
 
-        >>> # Swissgrid 15-min vs SFOE daily
+        >>> # 15-minute indicator vs daily target
         >>> df = prepare_dataframe(
-        ...     target_series=sfoe_daily,
-        ...     indicator_series=swissgrid_15min
+        ...     target_series=daily_target,
+        ...     indicator_series=indicator_15min
         ... )
     """
     target_series = target_series.copy()

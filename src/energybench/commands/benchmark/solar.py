@@ -20,9 +20,8 @@ def solar(
     method: str = "chow-lin",
     conversion: str = "sum",
 ):
-    """
-    """
-    variable = 'solar'
+    """ """
+    variable = "solar"
     benchmarked_dataframe = benchmark(
         variable=variable,
         high_frequency_csv=high_frequency_csv,
@@ -43,7 +42,7 @@ def solar(
         end=end,
         suffix=".csv",
     )
-    
+
     save_dataframe(
         df=benchmarked_dataframe,
         filename=filename,

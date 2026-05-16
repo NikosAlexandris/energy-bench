@@ -9,8 +9,7 @@ def build_daily_validation(
     reconciled_hourly: pd.Series,
     daily_reference: pd.Series,
 ) -> pd.DataFrame:
-    """
-    """
+    """ """
     print("> Building daily validation...")
     original_daily = original_hourly.resample("D").sum().rename("original_daily")
     filtered_daily = filtered_hourly.resample("D").sum().rename("filtered_daily")

@@ -28,8 +28,7 @@ def plot_series_difference(
     units: str = "GWh",
     xlabel: str = "",
 ) -> Figure:
-    """
-    """
+    """ """
     # Series
     benchmarked_series = benchmarked_series.sort_index()
     target_series = target_series.sort_index()
@@ -78,16 +77,20 @@ def plot_series_difference(
     )
     # Mark missing values with red dots
     import numpy as np
+
     missing_mask = benchmarked_series.isna()
     if missing_mask.any():
         print(f"Missing value in {benchmarked_series}")
-        missing_label=f'Missing ({missing_mask.sum()} points)'
-        ax_top.scatter(benchmarked_series.index[missing_mask],
-                   np.full(missing_mask.sum(), benchmarked_series.min()),
-                   color='red', marker='o', s=50,
-                   # label=f'Missing ({missing_mask.sum()} points)',
-                   zorder=5,
-                )
+        missing_label = f"Missing ({missing_mask.sum()} points)"
+        ax_top.scatter(
+            benchmarked_series.index[missing_mask],
+            np.full(missing_mask.sum(), benchmarked_series.min()),
+            color="red",
+            marker="o",
+            s=50,
+            # label=f'Missing ({missing_mask.sum()} points)',
+            zorder=5,
+        )
 
     bench_rolling = benchmarked_series.rolling(24, center=True, min_periods=1).mean()
     ax_top.plot(
@@ -162,9 +165,10 @@ def plot_series_difference(
         color=LESS_THAN_BLACK,
     )
 
-   # First label
+    # First label
     label_1 = fig.text(
-        x0, subtitle_y,
+        x0,
+        subtitle_y,
         f"— {bench_label}",
         ha="left",
         va="top",
@@ -194,7 +198,8 @@ def plot_series_difference(
     # Second label
     label_2_x = rolling_label_x + rolling_label_width + gap
     label_2 = fig.text(
-        label_2_x, subtitle_y,
+        label_2_x,
+        subtitle_y,
         f"— {target_label}",
         ha="left",
         va="top",
@@ -208,7 +213,8 @@ def plot_series_difference(
     missing_label_x = label_2_x + label_2_width + gap
     if missing_mask.any():
         fig.text(
-                missing_label_x, subtitle_y,
+            missing_label_x,
+            subtitle_y,
             f"o {missing_label}",
             ha="left",
             va="top",
@@ -257,16 +263,18 @@ def plot_series_difference(
     if not benchmarked_series_label and not target_series_label:
         # Colored subtitle row
         fig.text(
-            0.08, subtitle_y,
+            0.08,
+            subtitle_y,
             benchmarked_data_source or benchmarked_series_label,
             ha="left",
             va="top",
             fontsize=8,
-            color="#7A7A7A",   # benchmarked series grey
+            color="#7A7A7A",  # benchmarked series grey
         )
 
         fig.text(
-            0.205, subtitle_y,
+            0.205,
+            subtitle_y,
             "—",
             ha="left",
             va="top",
@@ -275,12 +283,13 @@ def plot_series_difference(
         )
 
         fig.text(
-            0.22, subtitle_y,
+            0.22,
+            subtitle_y,
             target_data_source or target_series_label,
             ha="left",
             va="top",
             fontsize=8,
-            color="#B55A52",   # target series muted Swiss red
+            color="#B55A52",  # target series muted Swiss red
         )
     plt.subplots_adjust(left=0.08, right=0.98, top=0.88, bottom=0.10)
 

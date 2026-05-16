@@ -5,7 +5,10 @@ from energybench.commands.compare.series import compare_series_shape
 from energybench.commands.compare.scaled_vs_target import compare_scaled_vs_target
 
 
-compare_app = App(name="compare", help="Compare high-frequency (ex. SFOE) and low-frequency (ex. ENTSO-E) time series")
+compare_app = App(
+    name="compare",
+    help="Compare high-frequency (ex. target source) and low-frequency (ex. indicator source) time series",
+)
 
 
 compare_app.command(

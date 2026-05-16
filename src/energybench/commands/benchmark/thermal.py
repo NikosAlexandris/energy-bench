@@ -20,9 +20,8 @@ def thermal(
     method: str = "chow-lin",
     conversion: str = "sum",
 ):
-    """
-    """
-    variable = 'thermal'
+    """ """
+    variable = "thermal"
     benchmarked_dataframe = benchmark(
         variable=variable,
         high_frequency_csv=high_frequency_csv,
@@ -42,7 +41,7 @@ def thermal(
         end=end,
         suffix=".csv",
     )
-    
+
     save_dataframe(
         df=benchmarked_dataframe,
         filename=filename,

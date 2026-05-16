@@ -19,8 +19,7 @@ def summary(
     frequency: str = "D",
     output_csv: Path = Path("output/validation_summary.csv"),
 ):
-    """
-    """
+    """ """
     cfg = get_variable_config(variable)
 
     kind_of_value_column = {

@@ -16,8 +16,7 @@ def daily_balance(
     low_frequency_date_column: str = "Date",
     output_csv: Path = Path("output/validation_daily_balance.csv"),
 ):
-    """
-    """
+    """ """
     cfg = get_variable_config(variable)
 
     kind_of_value_column = {

@@ -22,16 +22,18 @@ def plausibility_check(
         s = num[col]
         diff = s.diff().abs()
 
-        rows.append({
-            "variable": col,
-            "negative_count": int((s < 0).sum()),
-            "missing_count": int(s.isna().sum()),
-            "zero_count": int((s == 0).sum()),
-            "max_ramp": float(diff.max()) if not diff.dropna().empty else None,
-            "mean_ramp": float(diff.mean()) if not diff.dropna().empty else None,
-            "ramp_exceeds_threshold": (
-                int((diff > ramp_threshold).sum()) if ramp_threshold is not None else None
-            ),
-        })
+        rows.append(
+            {
+                "variable": col,
+                "negative_count": int((s < 0).sum()),
+                "missing_count": int(s.isna().sum()),
+                "zero_count": int((s == 0).sum()),
+                "max_ramp": float(diff.max()) if not diff.dropna().empty else None,
+                "mean_ramp": float(diff.mean()) if not diff.dropna().empty else None,
+                "ramp_exceeds_threshold": (
+                    int((diff > ramp_threshold).sum()) if ramp_threshold is not None else None
+                ),
+            }
+        )
 
     return pd.DataFrame(rows)

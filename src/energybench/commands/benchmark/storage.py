@@ -5,7 +5,7 @@ from energybench.benchmark import benchmark
 from energybench.io.output import save_dataframe, build_filename
 
 
-app = App(help="Benchmark Speicherkraft (reservoir) vs ENTSO-E Hydro Water Reservoir.")
+app = App(help="Benchmark Speicherkraft (reservoir) vs indicator source Hydro Water Reservoir.")
 
 
 @app.default()
@@ -23,10 +23,10 @@ def storage(
     """
     Benchmark Speicherkraft (reservoir storage).
 
-    Low-frequency target:      SFOE Speicherkraft (daily)
-    High-frequency indicator:  ENTSO-E Hydro Water Reservoir (hourly)
+    Low-frequency target:      target source Speicherkraft (daily)
+    High-frequency indicator:  indicator source Hydro Water Reservoir (hourly)
     """
-    variable = 'storage'
+    variable = "storage"
     benchmarked_dataframe = benchmark(
         variable=variable,
         high_frequency_csv=high_frequency_csv,
@@ -47,7 +47,7 @@ def storage(
         end=end,
         suffix=".csv",
     )
-    
+
     save_dataframe(
         df=benchmarked_dataframe,
         filename=filename,

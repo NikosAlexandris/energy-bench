@@ -24,8 +24,7 @@ def build_target_series(
     low_frequency_columns: list[str] | None = None,
     frequency: str = "D",
 ) -> pd.Series:
-    """
-    """
+    """ """
     if not low_frequency_columns:
         raise ValueError("low_frequency_columns must contain at least one column name.")
 
@@ -35,7 +34,7 @@ def build_target_series(
         parse_dates=[low_frequency_date_column],
         index_col=low_frequency_date_column,
     )
-    low_frequency_series = low_frequency_series.loc[start.normalize():end.normalize()]
+    low_frequency_series = low_frequency_series.loc[start.normalize() : end.normalize()]
 
     missing = [col for col in low_frequency_columns if col not in low_frequency_series.columns]
     if missing:
@@ -61,8 +60,7 @@ def build_resampled_series(
     frequency: str = "D",
     series_name: str = "series",
 ) -> pd.Series:
-    """
-    """
+    """ """
     df = pd.read_csv(
         csv_file,
         parse_dates=[datetime_column],
@@ -152,7 +150,6 @@ def build_validation_table(
     for key in list(series_data):
         series_data[key] = series_data[key].reindex(common_index)
 
-
     check = pd.DataFrame(series_data)
     check.index.name = "DateTime"
     if "original" in check.columns:
@@ -171,8 +168,7 @@ def build_before_after_table(
     original_columns: list[str],
     adjusted_columns: list[str],
 ) -> pd.DataFrame:
-    """
-    """
+    """ """
     df = pd.read_csv(
         csv_file,
         parse_dates=[datetime_column],

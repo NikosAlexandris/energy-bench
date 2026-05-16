@@ -25,7 +25,7 @@ def read_csv(
     )
 
     lazy_columns = pl.LazyFrame.collect_schema(scan).names()
-    
+
     # Handle case when columns is None (read all columns)
     if columns is None:
         available_columns = None
@@ -36,7 +36,7 @@ def read_csv(
 
         if not available_columns:
             raise ValueError(f"No columns found for {source.name}: {columns}")
-        
+
         if missing_columns:
             print(f"⚠️  Warning: missing columns for {source.name}: {missing_columns}")
             print(f"   Using available: {available_columns}")
@@ -49,8 +49,6 @@ def read_csv(
         q = q.select(available_columns)
 
     # Cast numeric columns to float (exclude time_column), keep missing as NaN
-    df = q.collect().with_columns(
-        pl.exclude(time_column).cast(pl.Float64, strict=False)
-    )
+    df = q.collect().with_columns(pl.exclude(time_column).cast(pl.Float64, strict=False))
 
     return df.to_pandas().set_index(time_column)

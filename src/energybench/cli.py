@@ -3,6 +3,7 @@
 Swiss electricity benchmarking CLI.
 Benchmark, validate, plot, fetch, clean, compare, and check Swiss electricity generation time series.
 """
+
 from cyclopts import App
 
 from energybench.commands.list import app as list_app

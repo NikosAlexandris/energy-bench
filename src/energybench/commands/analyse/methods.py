@@ -46,21 +46,21 @@ def compare_adjustment_methods(
     
     Example:
         nrgbnc analyze compare-methods river \\
-            --high-frequency-csv data/entsoe_hourly.csv \\
-            --low-frequency-csv data/sfoe_daily.csv \\
+            --high-frequency-csv data/hourly_indicator.csv \\
+            --low-frequency-csv data/daily_target.csv \\
             --start 2024-01-01 \\
             --end 2024-12-31 \\
             --methods scaling benchmarking advanced_scaling
     """
     if methods is None:
         methods = ["scaling", "benchmarking", "advanced_scaling"]
-    
+
     print(f"🔬 Comparing adjustment methods for {variable}...")
     print(f"   Methods: {', '.join(methods)}")
     print(f"   Period: {start.date()} to {end.date()}")
-    
+
     # TODO: Implement method comparison logic
     # This would run each method and compare their results
-    
+
     print("\n⚠️  Method comparison not yet fully implemented")
     print("   Use 'nrgbnc analyze bias-patterns' for recommendations")

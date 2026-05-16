@@ -20,7 +20,7 @@ def wind(
     method: str = "chow-lin",
     conversion: str = "sum",
 ):
-    variable= 'wind'
+    variable = "wind"
     benchmarked_dataframe = benchmark(
         variable=variable,
         high_frequency_csv=high_frequency_csv,
@@ -40,7 +40,7 @@ def wind(
         end=end,
         suffix=".csv",
     )
-    
+
     save_dataframe(
         df=benchmarked_dataframe,
         filename=filename,

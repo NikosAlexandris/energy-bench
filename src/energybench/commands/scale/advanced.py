@@ -22,16 +22,16 @@ def scale_high_frequency_series_advanced(
 ):
     """
     Advanced daily scaling with additional constraints.
-    
+
     This method scales hourly values to match daily targets while:
     - Enforcing minimum values (default: 0.0)
     - Optionally preserving zero values in the original series
     - Redistributing remainders across non-zero hours when preserve_zeros=True
-    
+
     Args:
         variable: Energy type (nuclear, water, river, storage, solar, wind, thermal)
-        high_frequency_csv: Path to hourly ENTSO-E data
-        low_frequency_csv: Path to daily SFOE data
+        high_frequency_csv: Path to hourly indicator source data
+        low_frequency_csv: Path to daily target source data
         start: Start timestamp
         end: End timestamp
         high_frequency_datetime_column: Column name for hourly timestamps
@@ -67,15 +67,17 @@ def scale_high_frequency_series_advanced(
         warn_threshold=warn_threshold,
         min_daily_sum=min_daily_sum,
     )
-    
-    out = DataFrame({
-        "DateTime": scaled_series.index,
-        cfg["original_column"]: high_frequency_series.reindex(scaled_series.index).values,
-        cfg["scaled_per_day_values"][0]: scaled_series,
-    })
-    out["high_frequency_set"] = "ENTSO-E"
+
+    out = DataFrame(
+        {
+            "DateTime": scaled_series.index,
+            cfg["original_column"]: high_frequency_series.reindex(scaled_series.index).values,
+            cfg["scaled_per_day_values"][0]: scaled_series,
+        }
+    )
+    out["high_frequency_set"] = "indicator source"
     out["high_frequency_type"] = ", ".join(cfg["indicator_type"])
-    out["low_frequency_set"] = "SFOE"
+    out["low_frequency_set"] = "target source"
     out["low_frequency_type"] = ", ".join(cfg["target_type"])
     out["scaling_method"] = "advanced_daily"
     out["min_value"] = min_value
@@ -88,7 +90,7 @@ def scale_high_frequency_series_advanced(
         end=end,
         suffix=".csv",
     )
-    
+
     save_dataframe(
         df=out,
         filename=filename,

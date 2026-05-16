@@ -15,13 +15,13 @@ def temporal_disaggregate_sfoe_daily_to_15min(
     output_filename: Path | None = None,
 ) -> pd.DataFrame:
     """
-    Disaggregate a daily SFOE per-type series to 15-minute values using Swissgrid totals
+    Disaggregate a daily target source per-type series to 15-minute values using Swissgrid totals
     as a temporal indicator.
 
     Parameters
     ----------
     daily_type_series : pd.Series
-        Daily SFOE totals for one generation type.
+        Daily target source totals for one generation type.
         Index must be datetime-like at daily frequency.
     swissgrid_15min_total : pd.Series
         Swissgrid 15-minute total production series.
@@ -95,7 +95,7 @@ def temporal_disaggregate_sfoe_daily_to_15min(
     df["hour"] = df.index.hour
     df["minute"] = df.index.minute
     df["generation_type"] = electricity_generation_type
-    df["source_daily"] = "SFOE"
+    df["source_daily"] = "target source"
     df["source_indicator"] = "Swissgrid"
     df["method"] = method
 

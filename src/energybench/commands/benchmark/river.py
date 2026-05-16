@@ -24,10 +24,10 @@ def river(
     """
     Benchmark Flusskraft (run-of-river).
 
-    Low-frequency target:      SFOE Flusskraft (daily)
-    High-frequency indicator:  ENTSO-E Hydro Run-of-river and poundage (hourly)
+    Low-frequency target:      target source Flusskraft (daily)
+    High-frequency indicator:  indicator source Hydro Run-of-river and poundage (hourly)
     """
-    variable = 'river'
+    variable = "river"
     benchmarked_dataframe = benchmark(
         variable=variable,
         high_frequency_csv=high_frequency_csv,
@@ -48,7 +48,7 @@ def river(
         end=end,
         suffix=".csv",
     )
-    
+
     save_dataframe(
         df=benchmarked_dataframe,
         filename=filename,

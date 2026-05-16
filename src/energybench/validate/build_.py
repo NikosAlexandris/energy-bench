@@ -39,8 +39,7 @@ def build_resampled_series(
     frequency: str = "D",
     series_name: str = "series",
 ) -> pd.Series:
-    """
-    """
+    """ """
     df = pd.read_csv(
         csv_file,
         parse_dates=[datetime_column],
@@ -78,8 +77,7 @@ def build_validation_table(
     low_frequency_date_column: str = "Date",
     frequency: str = "D",
 ) -> pd.DataFrame:
-    """
-    """
+    """ """
     original = build_resampled_series(
         csv_file=high_frequency_csv,
         start=start,

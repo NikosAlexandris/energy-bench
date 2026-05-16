@@ -40,9 +40,7 @@ def make_toy_data(
     indicator_hourly = np.clip(indicator_hourly, 0.01, None)
 
     true_series = pd.Series(true_hourly, index=index, name="true_hourly_gwh")
-    indicator_series = pd.Series(
-        indicator_hourly, index=index, name="indicator_hourly_gwh"
-    )
+    indicator_series = pd.Series(indicator_hourly, index=index, name="indicator_hourly_gwh")
     daily_reference = true_series.resample("D").sum().rename("daily_reference_gwh")
 
     print(f"> Generated toy data...")
@@ -117,8 +115,7 @@ def kalman_benchmark(
     observation_variance: float = 0.12,
     output_dir: Path = OUTPUT_DIR,
 ) -> tuple[Path, Path]:
-    """
-    """
+    """ """
     cfg = get_variable_config(variable)
     output_dir.mkdir(parents=True, exist_ok=True)
 
@@ -176,9 +173,6 @@ def kalman_benchmark(
         hourly_series=filtered_hourly,
         daily_reference=low_frequency,
     ).rename(cfg["output_column"])
-
-
-
 
     validation = build_daily_validation(
         original_hourly=high_frequency,

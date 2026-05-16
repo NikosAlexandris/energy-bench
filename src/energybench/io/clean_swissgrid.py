@@ -58,10 +58,9 @@ def combine_headers(row1, row2) -> list[str]:
 
 def find_timestamp_column(columns: list[str]) -> str:
     candidates = [
-        c for c in columns
-        if "zeitstempel" in c.lower()
-        or "timestamp" in c.lower()
-        or c.lower() == "ds"
+        c
+        for c in columns
+        if "zeitstempel" in c.lower() or "timestamp" in c.lower() or c.lower() == "ds"
     ]
     if not candidates:
         raise ValueError("Could not find a timestamp column.")
@@ -131,8 +130,7 @@ def load_and_clean_production_data(
 
     if not production_cols:
         raise ValueError(
-            "No production-related columns found. "
-            f"Inspect merged headers in '{file_path.name}'."
+            f"No production-related columns found. Inspect merged headers in '{file_path.name}'."
         )
 
     keep_cols = [timestamp_col] + production_cols

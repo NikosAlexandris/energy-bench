@@ -16,15 +16,15 @@ def expand_daily_to_hourly_flat(
 
 
 def compute_comparison_row(
-    entsoe: pd.DataFrame,
-    sfoe: pd.DataFrame,
+    indicator_data: pd.DataFrame,
+    target_data: pd.DataFrame,
     spec: dict,
     start: Timestamp,
     end: Timestamp,
 ) -> tuple[pd.Series, pd.Series, dict]:
     """ """
     hourly = sum_columns(
-        entsoe,
+        indicator_data,
         spec["hf_columns"],
         label=f"{spec['key']}_hourly",
         # factor=1 / 1000.0,  # MW -> GWh for hourly energy
@@ -33,7 +33,7 @@ def compute_comparison_row(
     hourly_daily = hourly.resample("D").sum()
 
     daily = sum_columns(
-        sfoe,
+        target_data,
         spec["lf_columns"],
         label=f"{spec['key']}_daily",
     ).loc[start:end]

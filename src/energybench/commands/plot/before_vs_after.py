@@ -15,7 +15,7 @@ def plot_before_vs_after(
     kind_of_csv: KindOfCSV = KindOfCSV.scaled,
     indicator_series_label: str | None = None,
     after_series_label: str | None = None,
-    data_source: str | None = None,  #"High-frequency series",
+    data_source: str | None = None,  # "High-frequency series",
     reconstruction_method: str | None = None,
     datetime_column: str = "DateTime",
     output_directory: Path = Path("output"),
@@ -66,7 +66,7 @@ def plot_before_vs_after(
         end=end,
         suffix=".png",
     )
-    
+
     save_figure(
         fig=figure,
         filename=filename,

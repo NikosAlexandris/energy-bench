@@ -19,13 +19,12 @@ def plot_comparison_metrics(
     """
     series_comparison_statistics = pd.read_csv(series_comparison_csv)
     # series_comparison_statistics = read_csv(
-    #     source=series_comparison_csv, 
+    #     source=series_comparison_csv,
     #     start=start,
     #     end=end,
     #     time_column=datetime_column
     # ).set_index(datetime_column)
     figure = plot_metrics_overview(df=series_comparison_statistics)
-
 
     save_figure(
         fig=figure,

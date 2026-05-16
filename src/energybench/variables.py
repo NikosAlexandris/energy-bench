@@ -29,7 +29,7 @@ VARIABLES = {
         "benchmarked_values": ["storage_benchmarked_gwh"],
         "scaled_values": ["storage_scaled_gwh"],
         "scaled_per_day_values": ["storage_scaled_per_day_gwh"],
-        "entsoe_types": ["Hydro Water Reservoir","Hydro Pumped Storage"],
+        "entsoe_types": ["Hydro Water Reservoir", "Hydro Pumped Storage"],
         "sfoe_types": ["Speicherkraft"],
         "kind": "atomic",
     },
@@ -95,8 +95,7 @@ def get_variable_config(
     low_frequency_types: list[str] | None = None,
     strict: bool = True,
 ) -> dict:
-    """
-    """
+    """ """
     key = variable.lower()
     if key not in VARIABLES:
         raise ValueError(
@@ -138,9 +137,7 @@ def get_variable_config(
     )
 
     if low_frequency_types is not None:
-        cfg["target_types_present"] = [
-            c for c in cfg["target_type"] if c in low_frequency_types
-        ]
+        cfg["target_types_present"] = [c for c in cfg["target_type"] if c in low_frequency_types]
         cfg["target_types_missing"] = [
             c for c in cfg["target_type"] if c not in low_frequency_types
         ]
@@ -162,13 +159,11 @@ def get_variable_config(
     if strict:
         if not cfg["target_types_present"]:
             raise ValueError(
-                f"No target columns found for '{key}'. "
-                f"Expected one of: {cfg['target_type']}"
+                f"No target columns found for '{key}'. Expected one of: {cfg['target_type']}"
             )
         if not cfg["indicator_types_present"]:
             raise ValueError(
-                f"No indicator columns found for '{key}'. "
-                f"Expected one of: {cfg['indicator_type']}"
+                f"No indicator columns found for '{key}'. Expected one of: {cfg['indicator_type']}"
             )
 
     return cfg

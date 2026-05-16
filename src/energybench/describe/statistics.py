@@ -25,15 +25,17 @@ def describe_wide_csv(
 
     num = df[columns].apply(pd.to_numeric, errors="coerce")
 
-    out = pd.DataFrame({
-        "count": num.count(),
-        "sum": num.sum(),
-        "mean": num.mean(),
-        "median": num.median(),
-        "min": num.min(),
-        "max": num.max(),
-        "std": num.std(),
-        "missing": num.isna().sum(),
-    })
+    out = pd.DataFrame(
+        {
+            "count": num.count(),
+            "sum": num.sum(),
+            "mean": num.mean(),
+            "median": num.median(),
+            "min": num.min(),
+            "max": num.max(),
+            "std": num.std(),
+            "missing": num.isna().sum(),
+        }
+    )
     out.index.name = "variable"
     return out.reset_index()

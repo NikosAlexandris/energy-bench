@@ -5,7 +5,7 @@ from energybench.benchmark import benchmark
 from energybench.io.output import save_dataframe, build_filename
 
 
-app = App(help="Benchmark hydro (Flusskraft + Speicherkraft vs ENTSO-E hydro total).")
+app = App(help="Benchmark hydro (Flusskraft + Speicherkraft vs indicator source hydro total).")
 
 
 @app.default()
@@ -26,10 +26,10 @@ def water(
     Parameters
     ----------
     high_frequency_csv: Path
-        ENTSO-E CSV time series for electricity generation
+        indicator source CSV time series for electricity generation
 
     low_frequency_csv:
-        SFOE CSV time series for electricity generation
+        target source CSV time series for electricity generation
 
     start: str
         The start timestamp string
@@ -39,10 +39,10 @@ def water(
 
     Notes
     -----
-    Low-frequency target:      SFOE Flusskraft + Speicherkraft (daily)
-    High-frequency indicator:  ENTSO-E Run-of-river + Reservoir + Pumped Storage (hourly)
+    Low-frequency target:      target source Flusskraft + Speicherkraft (daily)
+    High-frequency indicator:  indicator source Run-of-river + Reservoir + Pumped Storage (hourly)
     """
-    variable = 'water'
+    variable = "water"
     benchmarked_dataframe = benchmark(
         variable=variable,
         high_frequency_csv=high_frequency_csv,
@@ -62,7 +62,7 @@ def water(
         end=end,
         suffix=".csv",
     )
-    
+
     save_dataframe(
         df=benchmarked_dataframe,
         filename=filename,

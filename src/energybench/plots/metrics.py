@@ -5,24 +5,26 @@ import matplotlib.pyplot as plt
 
 def set_tufte_style():
     plt.style.use("default")
-    plt.rcParams.update({
-        "figure.figsize": (7, 4),
-        "axes.spines.top": False,
-        "axes.spines.right": False,
-        "axes.grid": True,
-        "grid.color": "0.85",
-        "grid.linestyle": "-",
-        "grid.linewidth": 0.5,
-        "axes.edgecolor": "0.3",
-        "axes.linewidth": 0.8,
-        "axes.titlesize": 20,
-        "axes.labelsize": 15,
-        "xtick.labelsize": 12,
-        "ytick.labelsize": 12,
-        "legend.fontsize": 14,
-        "lines.linewidth": 1.0,
-        "lines.markersize": 8,
-    })
+    plt.rcParams.update(
+        {
+            "figure.figsize": (7, 4),
+            "axes.spines.top": False,
+            "axes.spines.right": False,
+            "axes.grid": True,
+            "grid.color": "0.85",
+            "grid.linestyle": "-",
+            "grid.linewidth": 0.5,
+            "axes.edgecolor": "0.3",
+            "axes.linewidth": 0.8,
+            "axes.titlesize": 20,
+            "axes.labelsize": 15,
+            "xtick.labelsize": 12,
+            "ytick.labelsize": 12,
+            "legend.fontsize": 14,
+            "lines.linewidth": 1.0,
+            "lines.markersize": 8,
+        }
+    )
 
 
 def suggest_method(row: pd.Series) -> str:
@@ -51,17 +53,19 @@ def plot_metrics_overview(
     """
     set_tufte_style()
     df = df.copy()
-    
+
     # Handle missing or empty category names
     if "category" not in df.columns or df["category"].isna().all():
-        df["category"] = [f"Series {i+1}" for i in range(len(df))]
+        df["category"] = [f"Series {i + 1}" for i in range(len(df))]
     else:
         # Replace None/NaN/empty strings with default names
         df["category"] = df["category"].fillna("").astype(str)
-        df.loc[df["category"] == "", "category"] = [f"Series {i+1}" for i in range(len(df[df["category"] == ""]))]
-    
+        df.loc[df["category"] == "", "category"] = [
+            f"Series {i + 1}" for i in range(len(df[df["category"] == ""]))
+        ]
+
     df["method"] = df.apply(suggest_method, axis=1)
-    
+
     # Extract temporal extent if available
     temporal_extent = ""
     if "start" in df.columns and "end" in df.columns:
@@ -69,7 +73,9 @@ def plot_metrics_overview(
         end_dates = pd.to_datetime(df["end"])
         overall_start = start_dates.min()
         overall_end = end_dates.max()
-        temporal_extent = f" ({overall_start.strftime('%Y-%m-%d')} to {overall_end.strftime('%Y-%m-%d')})"
+        temporal_extent = (
+            f" ({overall_start.strftime('%Y-%m-%d')} to {overall_end.strftime('%Y-%m-%d')})"
+        )
 
     figure, axes = plt.subplots(1, 3, figsize=(14, 8), constrained_layout=True)
 
@@ -79,8 +85,15 @@ def plot_metrics_overview(
     for _, r in df.iterrows():
         label = str(r["category"]) if r["category"] else "Unknown"
         # Add more space between point and label (use "  " instead of " ")
-        ax.text(r["nrmse_mean"], r["pearson"], f"  {label}", fontsize=12,
-                ha="left", va="center", color="0.25")
+        ax.text(
+            r["nrmse_mean"],
+            r["pearson"],
+            f"  {label}",
+            fontsize=12,
+            ha="left",
+            va="center",
+            color="0.25",
+        )
     ax.axvline(0.5, color="0.7", linestyle="--", linewidth=0.8, label="nRMSE threshold")
     ax.axhline(0.9, color="0.7", linestyle="--", linewidth=0.8, label="Pearson threshold")
     ax.set_xlabel("nRMSE (lower is better)")

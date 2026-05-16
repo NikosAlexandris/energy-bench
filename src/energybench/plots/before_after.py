@@ -29,8 +29,7 @@ def plot_series_before_and_after(
     units: str = "GWh",
     xlabel: str = "Time",
 ) -> Figure:
-    """
-    """
+    """ """
     # Series
     original_series = dataframe[original_series].sort_index()
     adjusted_series = dataframe[adjusted_series].sort_index()
@@ -42,7 +41,6 @@ def plot_series_before_and_after(
         figsize=(11, 3.2),
         gridspec_kw={"hspace": 0.04},
     )
-
 
     # Minimal axis styling
     ax.spines["top"].set_visible(False)
@@ -76,15 +74,19 @@ def plot_series_before_and_after(
 
     # Mark missing values with red dots
     import numpy as np
+
     missing_mask = original_series.isna()
     if missing_mask.any():
-        missing_label=f'Missing ({missing_mask.sum()} points)'
-        ax.scatter(original_series.index[missing_mask],
-                   np.full(missing_mask.sum(), original_series.min()),
-                   color='red', marker='o', s=50,
-                   # label=f'Missing ({missing_mask.sum()} points)',
-                   zorder=5,
-                )
+        missing_label = f"Missing ({missing_mask.sum()} points)"
+        ax.scatter(
+            original_series.index[missing_mask],
+            np.full(missing_mask.sum(), original_series.min()),
+            color="red",
+            marker="o",
+            s=50,
+            # label=f'Missing ({missing_mask.sum()} points)',
+            zorder=5,
+        )
 
     ax.set_ylabel(units, fontsize=9, color="0.2")
     ax.tick_params(axis="x", length=0)
@@ -155,9 +157,10 @@ def plot_series_before_and_after(
         color="0.2",
     )
 
-   # First label
+    # First label
     label_1 = fig.text(
-        x0, subtitle_y,
+        x0,
+        subtitle_y,
         f"— {before_label}",
         ha="left",
         va="top",
@@ -172,7 +175,8 @@ def plot_series_before_and_after(
     # Second label
     label_2_x = x0 + label_1_width + gap
     label_2 = fig.text(
-        label_2_x, subtitle_y,
+        label_2_x,
+        subtitle_y,
         f"— {after_label}",
         ha="left",
         va="top",
@@ -186,7 +190,8 @@ def plot_series_before_and_after(
     missing_label_x = label_2_x + label_2_width + gap
     if missing_mask.any():
         fig.text(
-                missing_label_x, subtitle_y,
+            missing_label_x,
+            subtitle_y,
             f"o {missing_label}",
             ha="left",
             va="top",
@@ -197,21 +202,23 @@ def plot_series_before_and_after(
     if not original_series_label and not adjusted_series_label:
         # Colored subtitle row
         fig.text(
-            0.08, subtitle_y,
+            0.08,
+            subtitle_y,
             data_source or original_series_label,
             ha="left",
             va="top",
             fontsize=8,
-            color="#7A7A7A",   # Original series
+            color="#7A7A7A",  # Original series
         )
 
         fig.text(
-            0.22, subtitle_y,
+            0.22,
+            subtitle_y,
             data_source or adjusted_series_label,
             ha="left",
             va="top",
             fontsize=8,
-            color=SWISS_RED,   # Adjusted series
+            color=SWISS_RED,  # Adjusted series
         )
     fig.subplots_adjust(left=0.08, right=0.98, top=0.88, bottom=0.10)
 

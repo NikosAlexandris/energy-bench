@@ -37,8 +37,8 @@ def benchmark(
 
     Args:
         variable: Energy type to benchmark (e.g., "nuclear", "river", "solar")
-        high_frequency_csv: Path to high-frequency indicator CSV (e.g., ENTSO-E hourly)
-        low_frequency_csv: Path to low-frequency target CSV (e.g., SFOE daily)
+        high_frequency_csv: Path to high-frequency indicator CSV (hourly data source)
+        low_frequency_csv: Path to low-frequency target CSV (daily reference data)
         start: Start timestamp for analysis period
         end: End timestamp for analysis period
         high_frequency_datetime_column: Name of datetime column in indicator CSV
@@ -51,11 +51,11 @@ def benchmark(
         DataFrame with benchmarked hourly values and metadata
 
     Examples:
-        >>> # Benchmark nuclear generation using ENTSO-E and SFOE
+        >>> # Benchmark nuclear generation with hourly and daily data
         >>> result = benchmark(
         ...     variable="nuclear",
-        ...     high_frequency_csv=Path("data/entsoe_hourly.csv"),
-        ...     low_frequency_csv=Path("data/sfoe_daily.csv"),
+        ...     high_frequency_csv=Path("data/indicator_hourly.csv"),
+        ...     low_frequency_csv=Path("data/target_daily.csv"),
         ...     start=pd.Timestamp("2025-01-01"),
         ...     end=pd.Timestamp("2025-12-31"),
         ... )
@@ -63,8 +63,8 @@ def benchmark(
         >>> # Use ensemble method for better accuracy
         >>> result = benchmark(
         ...     variable="solar",
-        ...     high_frequency_csv=Path("data/entsoe_hourly.csv"),
-        ...     low_frequency_csv=Path("data/sfoe_daily.csv"),
+        ...     high_frequency_csv=Path("data/indicator_hourly.csv"),
+        ...     low_frequency_csv=Path("data/target_daily.csv"),
         ...     start=pd.Timestamp("2025-01-01"),
         ...     end=pd.Timestamp("2025-12-31"),
         ...     method="ensemble",
@@ -132,9 +132,9 @@ def benchmark(
     output_dataframe["hour"] = output_dataframe["DateTime"].dt.hour
     output_dataframe["month"] = output_dataframe["DateTime"].dt.month
     output_dataframe["variable"] = cfg["label"]
-    output_dataframe["indicator_source"] = "ENTSO-E"
+    output_dataframe["indicator_source"] = "indicator"
     output_dataframe["indicator_type"] = ", ".join(cfg["indicator_type"])
-    output_dataframe["target_source"] = "SFOE"
+    output_dataframe["target_source"] = "target"
     output_dataframe["target_type"] = ", ".join(cfg["target_type"])
     output_dataframe["kind"] = cfg.get("kind", "unknown")
 

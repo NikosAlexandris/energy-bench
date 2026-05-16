@@ -94,8 +94,8 @@ def plot_difference(
         benchmarked_data_source=high_frequency_data_source,
         target_data_source=low_frequency_data_source,
         #
-        electricity_generation_type=cfg["label"],  #electricity_generation_type,
-        frequency="Daily",  #frequency.lower(),  # FixMe : needed here is the frequency written out !
+        electricity_generation_type=cfg["label"],  # electricity_generation_type,
+        frequency="Daily",  # frequency.lower(),  # FixMe : needed here is the frequency written out !
         benchmarked_series_label=benchmarked_series_label or f"{high_frequency_data_source}",
         target_series_label=target_series_label or f"{low_frequency_data_source}",
         #
@@ -113,7 +113,7 @@ def plot_difference(
         )
     else:
         filename = output_filename.with_suffix(".png")
-    
+
     save_figure(
         filename=filename,
         output_dir=output_directory,

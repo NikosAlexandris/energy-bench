@@ -13,8 +13,7 @@ from selenium.webdriver.support.ui import WebDriverWait
 
 
 TARGET_PAGE = (
-    "https://www.swissgrid.ch/en/home/operation/grid-data/"
-    "generation.html#end-user-consumption"
+    "https://www.swissgrid.ch/en/home/operation/grid-data/generation.html#end-user-consumption"
 )
 
 DEFAULT_CHROMIUM_BINARY = "/usr/sbin/chromium"
@@ -52,9 +51,7 @@ def extract_excel_links(
 
     try:
         driver.get(page_url)
-        WebDriverWait(driver, timeout).until(
-            lambda d: len(d.find_elements(By.TAG_NAME, "a")) > 0
-        )
+        WebDriverWait(driver, timeout).until(lambda d: len(d.find_elements(By.TAG_NAME, "a")) > 0)
 
         links: list[str] = []
         seen: set[str] = set()

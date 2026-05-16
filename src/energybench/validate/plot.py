@@ -8,7 +8,7 @@ def plot_validation_table(
     data_source: str,
     electricity_generation_type: str,
     frequency: str = "daily",
-    label: str = "SFOE daily target",
+    label: str = "daily target target",
     units: str = "GWh",
     xlabel: str = "Date",
     output_directory: Path = Path("output"),

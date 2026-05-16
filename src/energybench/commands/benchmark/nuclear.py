@@ -5,7 +5,7 @@ from energybench.benchmark import benchmark
 from energybench.io.output import save_dataframe, build_filename
 
 
-app = App(help="Benchmark nuclear generation (Kernkraft vs ENTSO-E Nuclear).")
+app = App(help="Benchmark nuclear generation (Kernkraft vs indicator source Nuclear).")
 
 
 @app.default
@@ -23,10 +23,10 @@ def nuclear(
     """
     Benchmark nuclear generation.
 
-    Low-frequency target:      SFOE Kernkraft (daily)
-    High-frequency indicator:  ENTSO-E Nuclear (hourly)
+    Low-frequency target:      target source Kernkraft (daily)
+    High-frequency indicator:  indicator source Nuclear (hourly)
     """
-    variable= 'nuclear'
+    variable = "nuclear"
     benchmarked_dataframe = benchmark(
         variable=variable,
         high_frequency_csv=high_frequency_csv,
@@ -47,7 +47,7 @@ def nuclear(
         end=end,
         suffix=".csv",
     )
-    
+
     save_dataframe(
         df=benchmarked_dataframe,
         filename=filename,

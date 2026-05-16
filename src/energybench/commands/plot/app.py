@@ -8,7 +8,7 @@ from energybench.commands.plot.assemble import plot_assembled
 
 plot_app = App(name="plot", help="Plot original, target and adjusted time series with a context")
 plot_app.command(name="original-vs-target")(plot_original_vs_target)
-plot_app.command(name='before-vs-after')(plot_before_vs_after)
+plot_app.command(name="before-vs-after")(plot_before_vs_after)
 plot_app.command(name="after-vs-target")(plot_difference)
 plot_app.command(name="metrics")(plot_comparison_metrics)
 plot_app.command(name="assembled")(plot_assembled)
