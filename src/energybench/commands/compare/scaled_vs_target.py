@@ -30,9 +30,9 @@ def compare_scaled_vs_target(
     cfg = get_variable_config(variable)
 
     kind_of_value_column = {
-        "benchmarked": cfg["benchmarked_values"],
-        "scaled": cfg["scaled_values"],
-        "scaled-per-day": cfg["scaled_per_day_values"],
+        "benchmarked": cfg["benchmarked_column"],
+        "scaled": cfg["scaled_column"],
+        "scaled-per-day": cfg["scaled_advanced_column"],
     }
 
     if kind_of_csv not in kind_of_value_column:

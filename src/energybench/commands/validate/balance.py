@@ -20,9 +20,9 @@ def daily_balance(
     cfg = get_variable_config(variable)
 
     kind_of_value_column = {
-        "benchmarked": cfg["benchmarked_values"],
-        "scaled": cfg["scaled_values"],
-        "scaled-per-day": cfg["scaled_per_day_values"],
+        "benchmarked": cfg["benchmarked_column"],
+        "scaled": cfg["scaled_column"],
+        "scaled-per-day": cfg["scaled_advanced_column"],
         # "reconciled": cfg["reconciled_values"],
     }
 
@@ -43,7 +43,7 @@ def daily_balance(
         # csv_value_columns=[f"{variable}_scaled_gwh"],
         # high_frequency_columns = [cfg["original_value_column"]],
         high_frequency_columns=[f"{variable}_gwh"],
-        low_frequency_columns=cfg["sfoe_types"],
+        low_frequency_columns=cfg["target_types"],
         csv_datetime_column=csv_datetime_column,
         high_frequency_datetime_column=csv_datetime_column,
         low_frequency_date_column=low_frequency_date_column,

@@ -23,9 +23,9 @@ def summary(
     cfg = get_variable_config(variable)
 
     kind_of_value_column = {
-        "benchmarked": cfg["benchmarked_values"],
-        "scaled": cfg["scaled_values"],
-        "scaled-per-day": cfg["scaled_per_day_values"],
+        "benchmarked": cfg["benchmarked_column"],
+        "scaled": cfg["scaled_column"],
+        "scaled-per-day": cfg["scaled_advanced_column"],
         # "reconciled": cfg["reconciled_values"],
     }
 
@@ -44,8 +44,8 @@ def summary(
         start=start,
         end=end,
         csv_value_columns=csv_value_columns,
-        high_frequency_columns=cfg["entsoe_types"],
-        low_frequency_columns=cfg["sfoe_types"],
+        high_frequency_columns=cfg["indicator_types"],
+        low_frequency_columns=cfg["target_types"],
         csv_datetime_column=csv_datetime_column,
         high_frequency_datetime_column=high_frequency_datetime_column,
         low_frequency_date_column=low_frequency_date_column,

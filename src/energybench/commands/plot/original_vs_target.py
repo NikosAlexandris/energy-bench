@@ -77,7 +77,7 @@ def plot_original_vs_target(
     original_daily = (
         sum_columns(
             df=high_frequency_dataframe.loc[start:end],
-            columns=cfg["entsoe_types"],
+            columns=cfg["indicator_types"],
             output_name=f"{cfg['key']}_original_daily",
         )
         .resample("D")
@@ -91,7 +91,7 @@ def plot_original_vs_target(
         index_col=target_datetime_column,
     )
     low_freq = low_freq.loc[start.normalize() : end.normalize()]
-    target_daily = low_freq[cfg["sfoe_types"]].sum(axis=1)
+    target_daily = low_freq[cfg["target_types"]].sum(axis=1)
 
     # Align indexes
     common_idx = original_daily.index.union(target_daily.index).sort_values()

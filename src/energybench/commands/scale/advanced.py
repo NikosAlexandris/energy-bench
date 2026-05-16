@@ -72,7 +72,7 @@ def scale_indicator_series_advanced(
         {
             "DateTime": scaled_series.index,
             cfg["original_column"]: indicator_series.reindex(scaled_series.index).values,
-            cfg["scaled_per_day_values"][0]: scaled_series,
+            cfg["scaled_advanced_column"][0]: scaled_series,
         }
     )
     out["high_frequency_set"] = "indicator source"
