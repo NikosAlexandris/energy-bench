@@ -63,9 +63,9 @@ src/energybench/
 │
 ├── io/                           # ✅ KEEP: I/O operations
 │   ├── __init__.py
-│   ├── input.py                  # CSV reading
-│   ├── output.py                 # File writing
-│   └── fetch.py                  # Data fetching
+│   ├── reading.py                # CSV reading (avoids shadowing built-in)
+│   ├── writing.py                # File writing (more descriptive)
+│   └── fetching.py               # Data fetching
 │
 ├── commands/                     # ✅ KEEP: CLI only
 │   ├── __init__.py
@@ -87,9 +87,9 @@ src/energybench/
 │       └── ...
 │
 ├── cli.py                        # ✅ KEEP: Main CLI entry
-├── variables.py                  # ✅ KEEP: Configuration
-├── helpers.py                    # ✅ KEEP: Utilities
-└── benchmark.py                  # ✅ KEEP: Core benchmarking
+├── configuration.py              # ✅ RENAMED: From variables.py (clearer)
+├── utilities.py                  # ✅ RENAMED: From helpers.py (more standard)
+└── benchmarking.py               # ✅ RENAMED: From benchmark.py (noun form)
 ```
 
 **Benefits:**
@@ -271,16 +271,29 @@ def benchmark(
    touch src/energybench/core/__init__.py
    ```
 
-2. **Move and rename files:**
+2. **Rename root-level modules (following noun/gerund convention):**
+   ```bash
+   # Root level
+   git mv src/energybench/benchmark.py src/energybench/benchmarking.py
+   git mv src/energybench/helpers.py src/energybench/utilities.py
+   git mv src/energybench/variables.py src/energybench/configuration.py
+   
+   # I/O modules
+   git mv src/energybench/io/input.py src/energybench/io/reading.py
+   git mv src/energybench/io/output.py src/energybench/io/writing.py
+   git mv src/energybench/io/fetch.py src/energybench/io/fetching.py
+   ```
+
+3. **Move library functions to core/:**
    ```bash
    # Metrics
-   mv src/energybench/compare/series.py src/energybench/core/metrics.py
-   mv src/energybench/compare/shape.py src/energybench/core/shape.py
+   git mv src/energybench/compare/series.py src/energybench/core/metrics.py
+   git mv src/energybench/compare/shape.py src/energybench/core/shape.py
    
    # Validation
-   mv src/energybench/validate/build.py src/energybench/core/validation.py
+   git mv src/energybench/validate/build.py src/energybench/core/validation.py
    
-   # Visualization
+   # Visualization (consolidate multiple files)
    cat src/energybench/plots/*.py > src/energybench/core/visualization.py
    ```
 
@@ -336,6 +349,60 @@ rm -rf src/energybench/validate/
 - Update AGENTS.md
 - Create migration guide for users
 - Update examples
+
+---
+
+## Module Naming Conventions
+
+### Python Standard: Nouns/Gerunds (Not Verbs)
+
+Following PEP 8 and Python community standards, module names should be **nouns or gerunds** (what they contain), not verbs (what they do):
+
+```python
+# ✅ GOOD: Nouns/Gerunds
+benchmarking.py      # Contains benchmarking functions
+scaling.py           # Contains scaling operations
+reading.py           # Contains reading functions
+writing.py           # Contains writing functions
+validation.py        # Contains validation logic
+visualization.py     # Contains visualization functions
+
+# ❌ AVOID: Verbs
+benchmark.py         # Sounds like a command/script
+scale.py             # Ambiguous - scale what?
+read.py              # Conflicts with built-in, too generic
+write.py             # Conflicts with built-in, too generic
+validate.py          # Sounds like a command
+visualize.py         # Sounds like a command
+```
+
+### Rationale
+
+1. **Clarity**: `from io.reading import read_csv` is clearer than `from io.read import read_csv`
+2. **Namespace Safety**: Avoids conflicts with built-ins (`input`, `format`, `open`)
+3. **Consistency**: Matches Python stdlib (`logging`, `threading`, `multiprocessing`)
+4. **Semantics**: Modules are containers (nouns), not actions (verbs)
+
+### Energy-Bench Naming Updates
+
+```python
+# Current → Recommended
+benchmark.py → benchmarking.py       # Verb → Gerund
+helpers.py → utilities.py            # More standard (or keep helpers.py)
+variables.py → configuration.py      # More descriptive (or keep variables.py)
+
+io/
+  input.py → reading.py              # Avoid shadowing built-in
+  output.py → writing.py             # More descriptive
+  fetch.py → fetching.py             # Consistency
+
+# Already correct (keep as-is)
+models/scaling.py ✅
+models/disaggregation.py ✅
+core/metrics.py ✅
+core/validation.py ✅
+core/visualization.py ✅
+```
 
 ---
 
