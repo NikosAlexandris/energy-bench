@@ -10,7 +10,7 @@ import matplotlib.patches as mpatches
 import numpy as np
 import pandas as pd
 
-from energybench.analyze.bias_detection import BiasDetectionResult
+from energybench.analyse.bias_detection import BiasDetectionResult
 
 
 # Swiss-inspired color palette (Tufte style)
