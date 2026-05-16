@@ -3,7 +3,7 @@ from pathlib import Path
 from pandas import Timestamp
 from energybench.compare.types_ import compare_series_types
 from energybench.variables import Variable
-from energybench.io.output import save_dataframe
+from energybench.io.writing import save_dataframe
 
 
 def compare_types(

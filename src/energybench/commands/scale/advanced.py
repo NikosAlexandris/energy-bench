@@ -1,12 +1,12 @@
 from pathlib import Path
-from energybench.io.input import read_csv
+from energybench.io.reading import read_csv
 from energybench.variables import get_variable_config
 from pandas import DataFrame, Timestamp
 from energybench.models.scaling import advanced_daily_scaling
-from energybench.io.output import save_dataframe, build_filename
+from energybench.io.writing import save_dataframe, build_filename
 
 
-def scale_high_frequency_series_advanced(
+def scale_indicator_series_advanced(
     variable: str,
     high_frequency_csv: Path,
     low_frequency_csv: Path,
@@ -43,7 +43,7 @@ def scale_high_frequency_series_advanced(
     cfg = get_variable_config(variable)
     output_dir.mkdir(parents=True, exist_ok=True)
 
-    low_frequency_series = read_csv(
+    target_series = read_csv(
         source=low_frequency_csv,
         start=start.normalize(),
         end=end.normalize(),
@@ -51,7 +51,7 @@ def scale_high_frequency_series_advanced(
         columns=[low_frequency_datetime_column] + cfg["target_types_present"],
     ).squeeze()
 
-    high_frequency_series = read_csv(
+    indicator_series = read_csv(
         source=high_frequency_csv,
         start=start,
         end=end,
@@ -60,8 +60,8 @@ def scale_high_frequency_series_advanced(
     ).squeeze()
 
     scaled_series = advanced_daily_scaling(
-        high_frequency_series=high_frequency_series,
-        low_frequency_series=low_frequency_series,
+        indicator_series=indicator_series,
+        target_series=target_series,
         min_value=min_value,
         preserve_zeros=preserve_zeros,
         warn_threshold=warn_threshold,
@@ -71,7 +71,7 @@ def scale_high_frequency_series_advanced(
     out = DataFrame(
         {
             "DateTime": scaled_series.index,
-            cfg["original_column"]: high_frequency_series.reindex(scaled_series.index).values,
+            cfg["original_column"]: indicator_series.reindex(scaled_series.index).values,
             cfg["scaled_per_day_values"][0]: scaled_series,
         }
     )

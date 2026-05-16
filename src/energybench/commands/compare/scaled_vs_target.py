@@ -6,8 +6,8 @@ import numpy as np
 from pandas import Timestamp
 from energybench.variables import get_variable_config
 from energybench.print.metrics import print_metrics
-from energybench.io.input import read_csv
-from energybench.io.output import save_dataframe
+from energybench.io.reading import read_csv
+from energybench.io.writing import save_dataframe
 
 
 def compare_scaled_vs_target(

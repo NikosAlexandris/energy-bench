@@ -4,9 +4,9 @@ from pandas import Timestamp, DataFrame
 from energybench.compare.specifications import COMPARISON_SPECS
 from energybench.compare.shape import compare_intraday_shape, compute_comparison_row
 from energybench.helpers import sum_columns
-from energybench.io.input import read_csv
+from energybench.io.reading import read_csv
 from energybench.print.metrics import print_metrics
-from energybench.io.output import save_dataframe
+from energybench.io.writing import save_dataframe
 
 
 def compare_series_shape(

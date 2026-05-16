@@ -4,7 +4,7 @@ from pandas import Timestamp
 from energybench.plots.before_after import plot_series_before_and_after
 from energybench.validate.build import KindOfCSV
 from energybench.variables import get_variable_config
-from energybench.io.output import save_figure, build_filename
+from energybench.io.writing import save_figure, build_filename
 
 
 def plot_before_vs_after(

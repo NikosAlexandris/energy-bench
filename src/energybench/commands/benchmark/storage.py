@@ -1,8 +1,8 @@
 from pathlib import Path
 from cyclopts import App
 from pandas import Timestamp
-from energybench.benchmark import benchmark
-from energybench.io.output import save_dataframe, build_filename
+from energybench.models.benchmarking import benchmark
+from energybench.io.writing import save_dataframe, build_filename
 
 
 app = App(help="Benchmark Speicherkraft (reservoir) vs indicator source Hydro Water Reservoir.")
@@ -10,12 +10,12 @@ app = App(help="Benchmark Speicherkraft (reservoir) vs indicator source Hydro Wa
 
 @app.default()
 def storage(
-    high_frequency_csv: Path,
-    low_frequency_csv: Path,
+    indicator_csv: Path,
+    target_csv: Path,
     start: Timestamp,
     end: Timestamp,
-    high_frequency_datetime_column: str = "DateTime",
-    low_frequency_datetime_column: str = "Date",
+    indicator_time_column: str = "DateTime",
+    target_time_column: str = "Date",
     output_dir: Path = Path("output"),
     method: str = "chow-lin",
     conversion: str = "sum",
@@ -29,12 +29,12 @@ def storage(
     variable = "storage"
     benchmarked_dataframe = benchmark(
         variable=variable,
-        high_frequency_csv=high_frequency_csv,
-        low_frequency_csv=low_frequency_csv,
+        indicator_csv=indicator_csv,
+        target_csv=target_csv,
         start=start,
         end=end,
-        high_frequency_datetime_column=high_frequency_datetime_column,
-        low_frequency_datetime_column=low_frequency_datetime_column,
+        indicator_time_column=indicator_time_column,
+        target_time_column=target_time_column,
         output_dir=output_dir,
         method=method,
         conversion=conversion,

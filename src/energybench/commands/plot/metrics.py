@@ -1,7 +1,7 @@
 from pathlib import Path
 from energybench.plots.metrics import plot_metrics_overview
 import pandas as pd
-from energybench.io.output import save_figure
+from energybench.io.writing import save_figure
 
 
 def plot_comparison_metrics(

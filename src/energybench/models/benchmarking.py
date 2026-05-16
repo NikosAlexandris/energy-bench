@@ -5,7 +5,7 @@ from pandas import DataFrame, Timestamp
 from tempdisagg import TempDisaggModel
 
 from energybench.helpers import prepare_dataframe, sum_columns
-from energybench.io.input import read_csv
+from energybench.io.reading import read_csv
 from energybench.variables import get_variable_config
 
 
@@ -15,12 +15,14 @@ pd.options.future.infer_string = True
 
 def benchmark(
     variable: str,
-    high_frequency_csv: Path,
-    low_frequency_csv: Path,
+    indicator_csv: Path,
+    target_csv: Path,
     start: Timestamp,
     end: Timestamp,
-    high_frequency_datetime_column: str = "DateTime",
-    low_frequency_datetime_column: str = "Date",
+    indicator_time_column: str = "DateTime",
+    target_time_column: str = "Date",
+    indicator_source: str | None = None,
+    target_source: str | None = None,
     output_dir: Path = Path("output"),
     method: str = "chow-lin",
     conversion: str = "sum",
@@ -37,12 +39,14 @@ def benchmark(
 
     Args:
         variable: Energy type to benchmark (e.g., "nuclear", "river", "solar")
-        high_frequency_csv: Path to high-frequency indicator CSV (hourly data source)
-        low_frequency_csv: Path to low-frequency target CSV (daily reference data)
+        indicator_csv: Path to high-frequency indicator CSV (e.g., hourly data)
+        target_csv: Path to low-frequency target CSV (e.g., daily reference data)
         start: Start timestamp for analysis period
         end: End timestamp for analysis period
-        high_frequency_datetime_column: Name of datetime column in indicator CSV
-        low_frequency_datetime_column: Name of datetime column in target CSV
+        indicator_time_column: Name of datetime column in indicator CSV
+        target_time_column: Name of datetime column in target CSV
+        indicator_source: Name of indicator data source (e.g., "ENTSO-E", "Swissgrid")
+        target_source: Name of target data source (e.g., "SFOE", "CustomReference")
         output_dir: Directory for output files
         method: Temporal disaggregation method ("chow-lin", "denton", "ensemble", etc.)
         conversion: Conversion type ("sum" for flow variables, "average" for stock variables)
@@ -51,35 +55,41 @@ def benchmark(
         DataFrame with benchmarked hourly values and metadata
 
     Examples:
-        >>> # Benchmark nuclear generation with hourly and daily data
+        >>> # Benchmark nuclear generation with ENTSO-E hourly and SFOE daily data
         >>> result = benchmark(
         ...     variable="nuclear",
-        ...     high_frequency_csv=Path("data/indicator_hourly.csv"),
-        ...     low_frequency_csv=Path("data/target_daily.csv"),
+        ...     indicator_csv=Path("data/entsoe_hourly.csv"),
+        ...     target_csv=Path("data/sfoe_daily.csv"),
         ...     start=pd.Timestamp("2025-01-01"),
         ...     end=pd.Timestamp("2025-12-31"),
         ... )
 
-        >>> # Use ensemble method for better accuracy
+        >>> # Use custom data sources with explicit source tracking
         >>> result = benchmark(
         ...     variable="solar",
-        ...     high_frequency_csv=Path("data/indicator_hourly.csv"),
-        ...     low_frequency_csv=Path("data/target_daily.csv"),
+        ...     indicator_csv=Path("data/swissgrid_15min.csv"),
+        ...     target_csv=Path("data/custom_daily.csv"),
         ...     start=pd.Timestamp("2025-01-01"),
         ...     end=pd.Timestamp("2025-12-31"),
+        ...     indicator_source="Swissgrid",
+        ...     target_source="CustomReference",
         ...     method="ensemble",
         ... )
     """
     cfg = get_variable_config(variable)
     output_dir.mkdir(parents=True, exist_ok=True)
 
+    # Get source names (use provided or fall back to defaults from config)
+    actual_indicator_source = indicator_source or cfg.get("default_indicator_source", "indicator")
+    actual_target_source = target_source or cfg.get("default_target_source", "target")
+
     # Read low-frequency target data
     target_data = read_csv(
-        source=low_frequency_csv,
+        source=target_csv,
         start=start.normalize(),
         end=end.normalize(),
-        time_column=low_frequency_datetime_column,
-        columns=[low_frequency_datetime_column] + cfg["target_types_present"],
+        time_column=target_time_column,
+        columns=[target_time_column] + cfg["target_types_present"],
     )
 
     target_series = sum_columns(
@@ -88,11 +98,11 @@ def benchmark(
 
     # Read high-frequency indicator data
     indicator_data = read_csv(
-        source=high_frequency_csv,
+        source=indicator_csv,
         start=start,
         end=end,
-        time_column=high_frequency_datetime_column,
-        columns=[high_frequency_datetime_column] + cfg["indicator_types_present"],
+        time_column=indicator_time_column,
+        columns=[indicator_time_column] + cfg["indicator_types_present"],
     )
 
     indicator_series = sum_columns(
@@ -132,9 +142,9 @@ def benchmark(
     output_dataframe["hour"] = output_dataframe["DateTime"].dt.hour
     output_dataframe["month"] = output_dataframe["DateTime"].dt.month
     output_dataframe["variable"] = cfg["label"]
-    output_dataframe["indicator_source"] = "indicator"
+    output_dataframe["indicator_source"] = actual_indicator_source
     output_dataframe["indicator_type"] = ", ".join(cfg["indicator_type"])
-    output_dataframe["target_source"] = "target"
+    output_dataframe["target_source"] = actual_target_source
     output_dataframe["target_type"] = ", ".join(cfg["target_type"])
     output_dataframe["kind"] = cfg.get("kind", "unknown")
 

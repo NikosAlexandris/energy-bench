@@ -14,7 +14,7 @@ from energybench.analyse.visualize import (
     plot_cluster_characteristics,
     plot_recommendation_timeline,
 )
-from energybench.io.input import read_csv
+from energybench.io.reading import read_csv
 from energybench.variables import get_variable_config
 from energybench.helpers import sum_columns
 

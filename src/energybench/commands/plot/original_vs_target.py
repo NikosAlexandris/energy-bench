@@ -4,7 +4,7 @@ import pandas as pd
 from pandas import Timestamp
 from energybench.plots.difference import plot_series_difference
 from energybench.variables import get_variable_config
-from energybench.io.output import save_figure, build_filename
+from energybench.io.writing import save_figure, build_filename
 
 
 def plot_original_vs_target(

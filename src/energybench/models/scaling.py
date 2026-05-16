@@ -3,30 +3,30 @@ import pandas as pd
 
 
 def scale_series(
-    high_frequency_series: pd.Series,
-    low_frequency_series: pd.Series,
+    indicator_series: pd.Series,
+    target_series: pd.Series,
     warn_threshold: float = 10.0,
     min_daily_sum: float = 0.01,
 ) -> pd.Series:
     """
-    Scale high-frequency series to match low-frequency targets.
+    Scale high-frequency indicator series to match low-frequency targets.
 
     Args:
-        high_frequency_series: Hourly data to scale
-        low_frequency_series: Daily targets
+        indicator_series: High-frequency data to scale (e.g., hourly)
+        target_series: Low-frequency targets (e.g., daily)
         warn_threshold: Warn if scaling factor exceeds this value (default: 10.0)
         min_daily_sum: Skip scaling if daily sum is below this threshold (default: 0.01 GWh)
 
     Returns:
         Scaled series with warnings for extreme factors
     """
-    high_frequency_series = high_frequency_series.sort_index().astype(float)
-    low_frequency_series = low_frequency_series.sort_index().astype(float)
+    indicator_series = indicator_series.sort_index().astype(float)
+    target_series = target_series.sort_index().astype(float)
 
-    day_index = high_frequency_series.index.normalize()
-    daily_sum = high_frequency_series.groupby(day_index).sum()
+    day_index = indicator_series.index.normalize()
+    daily_sum = indicator_series.groupby(day_index).sum()
 
-    factor = low_frequency_series.reindex(daily_sum.index) / daily_sum
+    factor = target_series.reindex(daily_sum.index) / daily_sum
     factor = factor.replace([np.inf, -np.inf], np.nan)
 
     # Detect extreme scaling factors
@@ -58,18 +58,18 @@ def scale_series(
             f"   Consider using advanced scaling with min_value parameter or checking data quality."
         )
 
-    scaled_series = high_frequency_series * factor.reindex(day_index).to_numpy()
+    scaled_series = indicator_series * factor.reindex(day_index).to_numpy()
 
     # Keep original values where factor is missing
     missing_days = factor.reindex(day_index).isna().to_numpy()
-    scaled_series = scaled_series.where(~missing_days, high_frequency_series)
+    scaled_series = scaled_series.where(~missing_days, indicator_series)
 
     return scaled_series
 
 
 def advanced_daily_scaling(
-    high_frequency_series: pd.Series,
-    low_frequency_series: pd.Series,
+    indicator_series: pd.Series,
+    target_series: pd.Series,
     min_value: float = 0.0,
     preserve_zeros: bool = True,
     warn_threshold: float = 10.0,
@@ -79,8 +79,8 @@ def advanced_daily_scaling(
     Advanced daily scaling with constraints and validation.
 
     Args:
-        high_frequency_series: Hourly data to scale
-        low_frequency_series: Daily targets
+        indicator_series: High-frequency data to scale (e.g., hourly)
+        target_series: Low-frequency targets (e.g., daily)
         min_value: Minimum allowed value after scaling (default: 0.0)
         preserve_zeros: Keep zeros from original series (default: True)
         warn_threshold: Warn if scaling factor exceeds this value (default: 10.0)
@@ -89,17 +89,17 @@ def advanced_daily_scaling(
     Returns:
         Scaled series with constraints applied
     """
-    high_frequency_series = high_frequency_series.sort_index().astype(float)
-    low_frequency_series = low_frequency_series.sort_index().astype(float)
+    indicator_series = indicator_series.sort_index().astype(float)
+    target_series = target_series.sort_index().astype(float)
 
     out = []
     extreme_days = []
     small_sum_days = []
 
-    for day, x in high_frequency_series.groupby(high_frequency_series.index.normalize()):
+    for day, x in indicator_series.groupby(indicator_series.index.normalize()):
         # Try to get target value for this day
         try:
-            target = low_frequency_series.loc[pd.Timestamp(day)]
+            target = target_series.loc[pd.Timestamp(day)]
         except KeyError:
             target = np.nan
 
