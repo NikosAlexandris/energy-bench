@@ -81,22 +81,41 @@ nrgbnc list
 
 # Benchmark a specific energy type
 nrgbnc benchmark river \
-  --high-frequency-csv data/entsoe_hourly.csv \
-  --low-frequency-csv data/sfoe_daily.csv \
+  --indicator-csv data/entsoe_hourly.csv \
+  --target-csv data/sfoe_daily.csv \
   --start 2024-01-01 \
   --end 2024-12-31
 
-# Compare series
-nrgbnc compare --help
+# Compare any two series (new unified interface)
+nrgbnc compare series indicator target \
+  --variable river \
+  --indicator-csv data/entsoe_hourly.csv \
+  --target-csv data/sfoe_daily.csv \
+  --start 2024-01-01 \
+  --end 2024-12-31
 
-# Plot results
-nrgbnc plot --help
+# Plot comparison
+nrgbnc plot compare indicator adjusted \
+  --variable river \
+  --indicator-csv data/entsoe_hourly.csv \
+  --adjusted-csv output/river_benchmarked.csv \
+  --start 2024-01-01 \
+  --end 2024-12-31
 
 # Validate output
 nrgbnc validate --help
 ```
 
 ### Key Commands
+
+**Unified Comparison Interface (New):**
+- **`compare series <series1> <series2>`**: Compare any two series (indicator, adjusted, target)
+- **`plot compare <series1> <series2>`**: Plot comparison between any two series
+
+Valid comparisons:
+- `indicator vs target`: Shows why adjustment is needed
+- `indicator vs adjusted`: Shows what changed during adjustment  
+- `adjusted vs target`: Validates adjustment worked correctly
 
 - **`benchmark <energy-type>`**: Run temporal disaggregation for a specific energy type
 - **`scale`**: Scale hourly data to match targets
@@ -146,11 +165,13 @@ The codebase uses specific terminology to distinguish between data sources and r
 **Important Design Principle**: The tool is designed to be **source-agnostic**. While the current implementation primarily uses ENTSO-E (indicator) and SFOE (target) data, the architecture and terminology support any high-frequency indicator and low-frequency target sources. Always use generic terms (`indicator`, `target`) rather than source-specific names (`entsoe`, `sfoe`) in core logic.
 
 **Variable configuration keys**:
-- `target_type` / `target_types_present`: SFOE column names
-- `indicator_type` / `indicator_types_present`: ENTSO-E column names
+- `target_type` / `target_types_present`: Target source column names (e.g., SFOE columns)
+- `indicator_type` / `indicator_types_present`: Indicator source column names (e.g., ENTSO-E columns)
 - `output_column`: Name for benchmarked output
 - `original_column`: Name for original indicator values
 - `kind`: Either "atomic" (single type) or "aggregate" (sum of multiple types)
+- `indicator_source`: Default indicator data source name
+- `target_source`: Default target data source name
 
 ### Data Processing Patterns
 

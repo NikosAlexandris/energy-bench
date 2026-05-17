@@ -1,5 +1,5 @@
 from pathlib import Path
-from energybench.plots.metrics import plot_metrics_overview
+from energybench.core.plots.metrics import plot_metrics_overview
 import pandas as pd
 from energybench.io.writing import save_figure
 

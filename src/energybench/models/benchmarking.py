@@ -37,44 +37,67 @@ def benchmark(
 
     The function is source-agnostic and works with any time series data sources.
 
-    Args:
-        variable: Energy type to benchmark (e.g., "nuclear", "river", "solar")
-        indicator_csv: Path to high-frequency indicator CSV (e.g., hourly data)
-        target_csv: Path to low-frequency target CSV (e.g., daily reference data)
-        start: Start timestamp for analysis period
-        end: End timestamp for analysis period
-        indicator_time_column: Name of datetime column in indicator CSV
-        target_time_column: Name of datetime column in target CSV
-        indicator_source: Name of indicator data source (e.g., "ENTSO-E", "Swissgrid")
-        target_source: Name of target data source (e.g., "SFOE", "CustomReference")
-        output_dir: Directory for output files
-        method: Temporal disaggregation method ("chow-lin", "denton", "ensemble", etc.)
-        conversion: Conversion type ("sum" for flow variables, "average" for stock variables)
+    Parameters
+    ----------
+    variable : str
+        Energy type to benchmark (e.g., "nuclear", "river", "solar").
+    indicator_csv : Path
+        Path to high-frequency indicator CSV file (e.g., hourly data).
+    target_csv : Path
+        Path to low-frequency target CSV file (e.g., daily reference data).
+    start : pd.Timestamp
+        Start timestamp for analysis period.
+    end : pd.Timestamp
+        End timestamp for analysis period.
+    indicator_time_column : str, default="DateTime"
+        Name of datetime column in indicator CSV.
+    target_time_column : str, default="Date"
+        Name of datetime column in target CSV.
+    indicator_source : str, optional
+        Name of indicator data source (e.g., "ENTSO-E", "Swissgrid").
+        If None, uses default from variable configuration.
+    target_source : str, optional
+        Name of target data source (e.g., "SFOE", "CustomReference").
+        If None, uses default from variable configuration.
+    output_dir : Path, default=Path("output")
+        Directory for output files.
+    method : str, default="chow-lin"
+        Temporal disaggregation method. Options: "chow-lin", "denton",
+        "ensemble", etc.
+    conversion : str, default="sum"
+        Conversion type: "sum" for flow variables, "average" for stock variables.
 
-    Returns:
-        DataFrame with benchmarked hourly values and metadata
+    Returns
+    -------
+    pd.DataFrame
+        DataFrame with benchmarked hourly values and metadata columns including:
+        DateTime, original values, benchmarked values, date, hour, month,
+        variable, indicator_source, indicator_type, target_source, target_type, kind.
 
-    Examples:
-        >>> # Benchmark nuclear generation with ENTSO-E hourly and SFOE daily data
-        >>> result = benchmark(
-        ...     variable="nuclear",
-        ...     indicator_csv=Path("data/entsoe_hourly.csv"),
-        ...     target_csv=Path("data/sfoe_daily.csv"),
-        ...     start=pd.Timestamp("2025-01-01"),
-        ...     end=pd.Timestamp("2025-12-31"),
-        ... )
+    Examples
+    --------
+    Benchmark nuclear generation with ENTSO-E hourly and SFOE daily data:
 
-        >>> # Use custom data sources with explicit source tracking
-        >>> result = benchmark(
-        ...     variable="solar",
-        ...     indicator_csv=Path("data/swissgrid_15min.csv"),
-        ...     target_csv=Path("data/custom_daily.csv"),
-        ...     start=pd.Timestamp("2025-01-01"),
-        ...     end=pd.Timestamp("2025-12-31"),
-        ...     indicator_source="Swissgrid",
-        ...     target_source="CustomReference",
-        ...     method="ensemble",
-        ... )
+    >>> result = benchmark(
+    ...     variable="nuclear",
+    ...     indicator_csv=Path("data/entsoe_hourly.csv"),
+    ...     target_csv=Path("data/sfoe_daily.csv"),
+    ...     start=pd.Timestamp("2025-01-01"),
+    ...     end=pd.Timestamp("2025-12-31"),
+    ... )
+
+    Use custom data sources with explicit source tracking:
+
+    >>> result = benchmark(
+    ...     variable="solar",
+    ...     indicator_csv=Path("data/swissgrid_15min.csv"),
+    ...     target_csv=Path("data/custom_daily.csv"),
+    ...     start=pd.Timestamp("2025-01-01"),
+    ...     end=pd.Timestamp("2025-12-31"),
+    ...     indicator_source="Swissgrid",
+    ...     target_source="CustomReference",
+    ...     method="ensemble",
+    ... )
     """
     cfg = get_variable_config(variable)
     output_dir.mkdir(parents=True, exist_ok=True)

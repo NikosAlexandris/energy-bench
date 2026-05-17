@@ -24,13 +24,13 @@ def autodetect_bias_patterns(
         str,
         cyclopts.Parameter(help="Energy type to analyze (e.g., 'river', 'solar', 'nuclear')"),
     ],
-    high_frequency_csv: Annotated[
+    indicator_csv: Annotated[
         Path,
-        cyclopts.Parameter(help="Path to high-frequency CSV (hourly indicator data)"),
+        cyclopts.Parameter(help="Path to high-frequency indicator CSV (hourly data)"),
     ],
-    low_frequency_csv: Annotated[
+    target_csv: Annotated[
         Path,
-        cyclopts.Parameter(help="Path to low-frequency CSV (daily target data)"),
+        cyclopts.Parameter(help="Path to low-frequency target CSV (daily reference data)"),
     ],
     start: Annotated[
         pd.Timestamp,
@@ -80,13 +80,13 @@ def autodetect_bias_patterns(
         float,
         cyclopts.Parameter(help="Threshold for changepoint detection (bias % change)"),
     ] = 5.0,
-    high_frequency_datetime_column: Annotated[
+    indicator_time_column: Annotated[
         str,
-        cyclopts.Parameter(help="DateTime column name in high-frequency CSV"),
+        cyclopts.Parameter(help="DateTime column name in indicator CSV"),
     ] = "DateTime",
-    low_frequency_date_column: Annotated[
+    target_time_column: Annotated[
         str,
-        cyclopts.Parameter(help="Date column name in low-frequency CSV"),
+        cyclopts.Parameter(help="Date column name in target CSV"),
     ] = "Date",
 ) -> None:
     """
@@ -115,12 +115,12 @@ def autodetect_bias_patterns(
     config = get_variable_config(variable, strict=True)
 
     # Read high-frequency data
-    print(f"📖 Reading high-frequency data from {high_frequency_csv}...")
+    print(f"📖 Reading indicator data from {indicator_csv}...")
     hf_df = read_csv(
-        high_frequency_csv,
+        indicator_csv,
         start=start,
         end=end,
-        time_column=high_frequency_datetime_column,
+        time_column=indicator_time_column,
     )
 
     # Sum indicator columns
@@ -131,12 +131,12 @@ def autodetect_bias_patterns(
     ).loc[start:end]
 
     # Read low-frequency data
-    print(f"📖 Reading low-frequency data from {low_frequency_csv}...")
+    print(f"📖 Reading target data from {target_csv}...")
     lf_df = read_csv(
-        low_frequency_csv,
+        target_csv,
         start=start,
         end=end,
-        time_column=low_frequency_date_column,
+        time_column=target_time_column,
     )
 
     # Sum target columns

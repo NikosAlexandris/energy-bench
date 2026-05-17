@@ -14,13 +14,13 @@ def compare_adjustment_methods(
         str,
         cyclopts.Parameter(help="Energy type to analyze"),
     ],
-    high_frequency_csv: Annotated[
+    indicator_csv: Annotated[
         Path,
-        cyclopts.Parameter(help="Path to high-frequency CSV"),
+        cyclopts.Parameter(help="Path to high-frequency indicator CSV"),
     ],
-    low_frequency_csv: Annotated[
+    target_csv: Annotated[
         Path,
-        cyclopts.Parameter(help="Path to low-frequency CSV"),
+        cyclopts.Parameter(help="Path to low-frequency target CSV"),
     ],
     start: Annotated[
         pd.Timestamp,
@@ -46,8 +46,8 @@ def compare_adjustment_methods(
     
     Example:
         nrgbnc analyze compare-methods river \\
-            --high-frequency-csv data/hourly_indicator.csv \\
-            --low-frequency-csv data/daily_target.csv \\
+            --indicator-csv data/hourly_indicator.csv \\
+            --target-csv data/daily_target.csv \\
             --start 2024-01-01 \\
             --end 2024-12-31 \\
             --methods scaling benchmarking advanced_scaling

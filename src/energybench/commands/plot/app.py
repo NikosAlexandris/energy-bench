@@ -1,17 +1,30 @@
 from cyclopts import App
-from energybench.commands.plot.original_vs_target import plot_original_vs_target
-from energybench.commands.plot.difference import plot_difference
-from energybench.commands.plot.before_vs_after import plot_before_vs_after
+from energybench.commands.plot.unified import plot_comparison
 from energybench.commands.plot.metrics import plot_comparison_metrics
 from energybench.commands.plot.assemble import plot_assembled
 
 
-plot_app = App(name="plot", help="Plot original, target and adjusted time series with a context")
-plot_app.command(name="original-vs-target")(plot_original_vs_target)
-plot_app.command(name="before-vs-after")(plot_before_vs_after)
-plot_app.command(name="after-vs-target")(plot_difference)
-plot_app.command(name="metrics")(plot_comparison_metrics)
-plot_app.command(name="assembled")(plot_assembled)
+plot_app = App(
+    name="plot",
+    help="Plot comparisons between indicator, adjusted, and target series",
+)
+
+# Unified interface for plotting comparisons
+plot_app.command(
+    name="compare",
+    help="Plot comparison between any two series: indicator, adjusted, or target",
+)(plot_comparison)
+
+# Specialized plot commands
+plot_app.command(
+    name="metrics",
+    help="Plot comparison metrics from CSV file",
+)(plot_comparison_metrics)
+
+plot_app.command(
+    name="assembled",
+    help="Plot assembled multi-variable series",
+)(plot_assembled)
 
 
 if __name__ == "__main__":

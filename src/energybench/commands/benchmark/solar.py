@@ -20,7 +20,35 @@ def solar(
     method: str = "chow-lin",
     conversion: str = "sum",
 ):
-    """ """
+    """
+    Benchmark solar generation using temporal disaggregation.
+
+    Parameters
+    ----------
+    indicator_csv : Path
+        Path to high-frequency indicator CSV (e.g., ENTSO-E hourly data).
+    target_csv : Path
+        Path to low-frequency target CSV (e.g., SFOE daily data).
+    start : pd.Timestamp
+        Start timestamp for benchmarking period.
+    end : pd.Timestamp
+        End timestamp for benchmarking period.
+    indicator_time_column : str, default="DateTime"
+        Name of datetime column in indicator CSV.
+    target_time_column : str, default="Date"
+        Name of datetime column in target CSV.
+    output_dir : Path, default=Path("output")
+        Directory for output files.
+    method : str, default="chow-lin"
+        Temporal disaggregation method to use.
+    conversion : str, default="sum"
+        Conversion method for aggregation.
+
+    Notes
+    -----
+    Reconciles ENTSO-E "Solar" (hourly) with SFOE "Photovoltaik" (daily)
+    using temporal disaggregation.
+    """
     variable = "solar"
     benchmarked_dataframe = benchmark(
         variable=variable,

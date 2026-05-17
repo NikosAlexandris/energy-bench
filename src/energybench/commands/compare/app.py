@@ -1,25 +1,23 @@
 from __future__ import annotations
 from cyclopts import App
+from energybench.commands.compare.unified import compare_series_unified
 from energybench.commands.compare.types import compare_types
-from energybench.commands.compare.series import compare_series_shape
-from energybench.commands.compare.scaled_vs_target import compare_scaled_vs_target
 
 
 compare_app = App(
     name="compare",
-    help="Compare high-frequency (ex. target source) and low-frequency (ex. indicator source) time series",
+    help="Compare time series: indicator, adjusted, and target",
 )
 
 
+# Unified interface for comparing any two series
+compare_app.command(
+    name="series",
+    help="Compare any two series: indicator, adjusted, or target",
+)(compare_series_unified)
+
+# Specialized command for comparing energy types
 compare_app.command(
     name="types",
-    help="Types",
+    help="Compare energy types between indicator and target sources",
 )(compare_types)
-compare_app.command(
-    name="shape",
-    help="Compare shape of time series",
-)(compare_series_shape)
-compare_app.command(
-    name="scaled-vs-target",
-    help="",
-)(compare_scaled_vs_target)

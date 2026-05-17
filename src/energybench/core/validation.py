@@ -17,35 +17,47 @@ def save_validation_table(check: pd.DataFrame, output_csv: Path) -> None:
 
 
 def build_target_series(
-    low_frequency_csv: Path,
+    target_csv: Path,
     start: pd.Timestamp,
     end: pd.Timestamp,
-    low_frequency_date_column: str = "Date",
-    low_frequency_columns: list[str] | None = None,
+    target_time_column: str = "Date",
+    target_columns: list[str] | None = None,
     frequency: str = "D",
 ) -> pd.Series:
-    """ """
-    if not low_frequency_columns:
-        raise ValueError("low_frequency_columns must contain at least one column name.")
+    """
+    Build target series from low-frequency reference data.
+    
+    Args:
+        target_csv: Path to low-frequency target CSV
+        start: Start timestamp
+        end: End timestamp
+        target_time_column: Name of datetime column in target CSV
+        target_columns: List of column names to sum
+        frequency: Resampling frequency (default: "D" for daily)
+        
+    Returns:
+        Target series resampled to specified frequency
+    """
+    if not target_columns:
+        raise ValueError("target_columns must contain at least one column name.")
 
     # Read the low frequency time series, which is our "target" or "reference"
-    low_frequency_series = pd.read_csv(
-        low_frequency_csv,
-        parse_dates=[low_frequency_date_column],
-        index_col=low_frequency_date_column,
+    target_df = pd.read_csv(
+        target_csv,
+        parse_dates=[target_time_column],
+        index_col=target_time_column,
     )
-    low_frequency_series = low_frequency_series.loc[start.normalize() : end.normalize()]
+    target_df = target_df.loc[start.normalize() : end.normalize()]
 
-    missing = [col for col in low_frequency_columns if col not in low_frequency_series.columns]
+    missing = [col for col in target_columns if col not in target_df.columns]
     if missing:
-        raise ValueError(f"Missing columns in {low_frequency_csv}: {missing}")
+        raise ValueError(f"Missing columns in {target_csv}: {missing}")
 
-    for col in low_frequency_columns:
-        low_frequency_series[col] = pd.to_numeric(low_frequency_series[col], errors="coerce")
+    for col in target_columns:
+        target_df[col] = pd.to_numeric(target_df[col], errors="coerce")
 
-    # In case multiple low-frequency variables (i.e. electricity generation types) correspond
-    # to one or multiple high-frequency variables.
-    target = low_frequency_series[low_frequency_columns].sum(axis=1).resample(frequency).sum()
+    # Sum multiple target columns if needed
+    target = target_df[target_columns].sum(axis=1).resample(frequency).sum()
     target.name = "target"
 
     return target
@@ -103,9 +115,13 @@ def build_validation_table(
 ) -> pd.DataFrame:
     """
     Build a validation table comparing:
-    - high-frequency source (optional),
+    - indicator source (optional),
     - CSV to validate,
-    - low-frequency reference target.
+    - target reference.
+    
+    Note: This function maintains backward-compatible parameter names
+    (high_frequency_csv, low_frequency_csv) for internal use by existing code.
+    New code should use the wrapper functions with indicator/target terminology.
     """
     adjusted = build_resampled_series(
         csv_file=csv_to_validate,
@@ -118,11 +134,11 @@ def build_validation_table(
     )
 
     target = build_target_series(
-        low_frequency_csv=low_frequency_csv,
+        target_csv=low_frequency_csv,
         start=start.normalize(),
         end=end.normalize(),
-        low_frequency_date_column=low_frequency_date_column,
-        low_frequency_columns=low_frequency_columns,
+        target_time_column=low_frequency_date_column,
+        target_columns=low_frequency_columns,
         frequency=frequency,
     )
 

@@ -6,7 +6,7 @@ Energy-Bench uses **source-agnostic terminology** to support any time series dat
 
 - **Indicator**: High-frequency time series to be adjusted (e.g., ENTSO-E hourly, Swissgrid 15-min, or any custom source)
 - **Target**: Low-frequency reference values (e.g., SFOE daily, or any authoritative source)
-- **Benchmarked**: Output after temporal disaggregation (hourly values that sum to daily targets)
+- **Adjusted/Benchmarked**: Output after temporal disaggregation (hourly values that sum to daily targets)
 - **Original**: Unadjusted indicator values
 - **Scaled**: Output after simple scaling operations
 
@@ -25,6 +25,7 @@ Energy-Bench uses **source-agnostic terminology** to support any time series dat
 |---------|---------------|---------|
 | Indicator CSV file | `indicator_csv` | `entsoe_hourly.csv` |
 | Target CSV file | `target_csv` | `sfoe_daily.csv` |
+| Adjusted CSV file | `adjusted_csv` | `river_benchmarked.csv` |
 | Indicator time column | `indicator_time_column` | `"DateTime"` |
 | Target time column | `target_time_column` | `"Date"` |
 | Indicator columns | `indicator_fields` | `["Nuclear", "Solar"]` |
@@ -39,6 +40,69 @@ All outputs include metadata tracking data sources:
 - `target_source`: Name of target data source (e.g., "SFOE", "CustomReference")
 
 This design allows the tool to work with any combination of high-frequency and low-frequency time series sources, making it extensible and reusable beyond the original Swiss electricity use case.
+
+## Quick Start
+
+### Benchmark Energy Type
+
+```bash
+# Benchmark river generation
+nrgbnc benchmark river \
+  --indicator-csv data/entsoe_hourly.csv \
+  --target-csv data/sfoe_daily.csv \
+  --start 2024-01-01 \
+  --end 2024-12-31
+```
+
+### Compare Time Series
+
+```bash
+# Compare indicator vs target (shows why adjustment is needed)
+nrgbnc compare series indicator target \
+  --variable river \
+  --indicator-csv data/entsoe_hourly.csv \
+  --target-csv data/sfoe_daily.csv \
+  --start 2024-01-01 \
+  --end 2024-12-31
+
+# Compare indicator vs adjusted (shows what changed)
+nrgbnc compare series indicator adjusted \
+  --variable river \
+  --indicator-csv data/entsoe_hourly.csv \
+  --adjusted-csv output/river/river_hourly_benchmarked_2024_2024.csv \
+  --start 2024-01-01 \
+  --end 2024-12-31
+
+# Compare adjusted vs target (validates adjustment)
+nrgbnc compare series adjusted target \
+  --variable river \
+  --adjusted-csv output/river/river_hourly_benchmarked_2024_2024.csv \
+  --target-csv data/sfoe_daily.csv \
+  --start 2024-01-01 \
+  --end 2024-12-31
+```
+
+### Plot Comparisons
+
+```bash
+# Plot indicator vs target
+nrgbnc plot compare indicator target \
+  --variable river \
+  --indicator-csv data/entsoe_hourly.csv \
+  --target-csv data/sfoe_daily.csv \
+  --start 2024-01-01 \
+  --end 2024-12-31
+
+# Plot indicator vs adjusted
+nrgbnc plot compare indicator adjusted \
+  --variable river \
+  --indicator-csv data/entsoe_hourly.csv \
+  --adjusted-csv output/river/river_hourly_benchmarked_2024_2024.csv \
+  --start 2024-01-01 \
+  --end 2024-12-31
+```
+
+For more examples, see `docs/unified-comparison-examples.md`.
 
 
 ## Registry of 

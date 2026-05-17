@@ -18,7 +18,7 @@ import pandas as pd
 from sklearn.cluster import KMeans
 from sklearn.preprocessing import StandardScaler
 
-from energybench.compare.metrics import compare_series, align_series
+from energybench.core.metrics import compare_series, align_series
 
 
 @dataclass

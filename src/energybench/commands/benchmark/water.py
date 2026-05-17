@@ -21,26 +21,34 @@ def water(
     conversion: str = "sum",
 ) -> None:
     """
-    Benchmark hydro generation.
+    Benchmark total hydro generation using temporal disaggregation.
 
     Parameters
     ----------
-    indicator_csv: Path
-        indicator source CSV time series for electricity generation
-
-    target_csv:
-        target source CSV time series for electricity generation
-
-    start: str
-        The start timestamp string
-
-    end: str
-        The end timestamp string
+    indicator_csv : Path
+        Path to high-frequency indicator CSV (e.g., ENTSO-E hourly data).
+    target_csv : Path
+        Path to low-frequency target CSV (e.g., SFOE daily data).
+    start : pd.Timestamp
+        Start timestamp for benchmarking period.
+    end : pd.Timestamp
+        End timestamp for benchmarking period.
+    indicator_time_column : str, default="DateTime"
+        Name of datetime column in indicator CSV.
+    target_time_column : str, default="Date"
+        Name of datetime column in target CSV.
+    output_dir : Path, default=Path("output")
+        Directory for output files.
+    method : str, default="chow-lin"
+        Temporal disaggregation method to use.
+    conversion : str, default="sum"
+        Conversion method for aggregation.
 
     Notes
     -----
-    Low-frequency target:      target source Flusskraft + Speicherkraft (daily)
-    High-frequency indicator:  indicator source Run-of-river + Reservoir + Pumped Storage (hourly)
+    Reconciles ENTSO-E "Hydro Run-of-river", "Hydro Water Reservoir", and
+    "Hydro Pumped Storage" (hourly) with SFOE "Flusskraft + Speicherkraft"
+    (daily) using temporal disaggregation.
     """
     variable = "water"
     benchmarked_dataframe = benchmark(

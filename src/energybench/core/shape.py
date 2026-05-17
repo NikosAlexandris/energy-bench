@@ -1,6 +1,6 @@
 from typing import Optional
 from energybench.helpers import sum_columns
-from energybench.compare.metrics import _to_series, compare_series
+from energybench.core.metrics import _to_series, compare_series
 import pandas as pd
 from pandas import Timestamp
 import numpy as np
@@ -26,7 +26,7 @@ def compute_comparison_row(
     hourly = sum_columns(
         indicator_data,
         spec["hf_columns"],
-        label=f"{spec['key']}_hourly",
+        output_name=f"{spec['key']}_hourly",
         # factor=1 / 1000.0,  # MW -> GWh for hourly energy
     ).loc[start:end]
 
@@ -35,7 +35,7 @@ def compute_comparison_row(
     daily = sum_columns(
         target_data,
         spec["lf_columns"],
-        label=f"{spec['key']}_daily",
+        output_name=f"{spec['key']}_daily",
     ).loc[start:end]
 
     daily_hourly_flat = expand_daily_to_hourly_flat(daily, hourly.index)

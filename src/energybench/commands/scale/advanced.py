@@ -8,12 +8,14 @@ from energybench.io.writing import save_dataframe, build_filename
 
 def scale_indicator_series_advanced(
     variable: str,
-    high_frequency_csv: Path,
-    low_frequency_csv: Path,
+    indicator_csv: Path,
+    target_csv: Path,
     start: Timestamp,
     end: Timestamp,
-    high_frequency_datetime_column: str = "DateTime",
-    low_frequency_datetime_column: str = "Date",
+    indicator_time_column: str = "DateTime",
+    target_time_column: str = "Date",
+    indicator_source: str | None = None,
+    target_source: str | None = None,
     output_dir: Path = Path("output"),
     min_value: float = 0.0,
     preserve_zeros: bool = True,
@@ -28,35 +30,67 @@ def scale_indicator_series_advanced(
     - Optionally preserving zero values in the original series
     - Redistributing remainders across non-zero hours when preserve_zeros=True
 
-    Args:
-        variable: Energy type (nuclear, water, river, storage, solar, wind, thermal)
-        high_frequency_csv: Path to hourly indicator source data
-        low_frequency_csv: Path to daily target source data
-        start: Start timestamp
-        end: End timestamp
-        high_frequency_datetime_column: Column name for hourly timestamps
-        low_frequency_datetime_column: Column name for daily timestamps
-        output_dir: Directory for output files
-        min_value: Minimum allowed value after scaling (default: 0.0)
-        preserve_zeros: Keep zeros from original series (default: True)
+    Parameters
+    ----------
+    variable : str
+        Energy type (nuclear, water, river, storage, solar, wind, thermal).
+    indicator_csv : Path
+        Path to high-frequency indicator CSV file (e.g., hourly data).
+    target_csv : Path
+        Path to low-frequency target CSV file (e.g., daily reference data).
+    start : pd.Timestamp
+        Start timestamp for analysis period.
+    end : pd.Timestamp
+        End timestamp for analysis period.
+    indicator_time_column : str, default="DateTime"
+        Name of datetime column in indicator CSV.
+    target_time_column : str, default="Date"
+        Name of datetime column in target CSV.
+    indicator_source : str, optional
+        Name of indicator data source (e.g., "ENTSO-E", "Swissgrid").
+        If None, uses default from variable configuration.
+    target_source : str, optional
+        Name of target data source (e.g., "SFOE", "CustomReference").
+        If None, uses default from variable configuration.
+    output_dir : Path, default=Path("output")
+        Directory for output files.
+    min_value : float, default=0.0
+        Minimum allowed value after scaling.
+    preserve_zeros : bool, default=True
+        If True, keeps zeros from original series and redistributes
+        remainders across non-zero hours.
+    warn_threshold : float, default=10.0
+        Warn if scaling factor exceeds this value.
+    min_daily_sum : float, default=0.01
+        Skip scaling if daily sum is below this threshold.
+
+    Notes
+    -----
+    This advanced scaling method provides better handling of edge cases
+    compared to simple proportional scaling. It ensures non-negative values
+    and can preserve the zero-pattern of the original series.
     """
     cfg = get_variable_config(variable)
     output_dir.mkdir(parents=True, exist_ok=True)
 
+    # Get source names (use provided or fall back to defaults from config)
+    actual_indicator_source = indicator_source or cfg.get("default_indicator_source", "indicator")
+    actual_target_source = target_source or cfg.get("default_target_source", "target")
+
     target_series = read_csv(
-        source=low_frequency_csv,
+        source=target_csv,
         start=start.normalize(),
         end=end.normalize(),
-        time_column=low_frequency_datetime_column,
-        columns=[low_frequency_datetime_column] + cfg["target_types_present"],
+        time_column=target_time_column,
+        columns=[target_time_column] + cfg["target_types_present"],
     ).squeeze()
 
     indicator_series = read_csv(
-        source=high_frequency_csv,
+        source=indicator_csv,
         start=start,
         end=end,
-        time_column=high_frequency_datetime_column,
-        columns=[high_frequency_datetime_column] + cfg["indicator_types_present"],
+        time_column=indicator_time_column,
+        columns=[indicator_time_column] + cfg["indicator_types_present"],
     ).squeeze()
 
     scaled_series = advanced_daily_scaling(
@@ -72,13 +106,18 @@ def scale_indicator_series_advanced(
         {
             "DateTime": scaled_series.index,
             cfg["original_column"]: indicator_series.reindex(scaled_series.index).values,
-            cfg["scaled_advanced_column"][0]: scaled_series,
+            cfg["scaled_advanced_output_column"]: scaled_series,
         }
     )
-    out["high_frequency_set"] = "indicator source"
-    out["high_frequency_type"] = ", ".join(cfg["indicator_type"])
-    out["low_frequency_set"] = "target source"
-    out["low_frequency_type"] = ", ".join(cfg["target_type"])
+    out["date"] = out["DateTime"].dt.date
+    out["hour"] = out["DateTime"].dt.hour
+    out["month"] = out["DateTime"].dt.month
+    out["variable"] = cfg["label"]
+    out["indicator_source"] = actual_indicator_source
+    out["indicator_type"] = ", ".join(cfg["indicator_type"])
+    out["target_source"] = actual_target_source
+    out["target_type"] = ", ".join(cfg["target_type"])
+    out["kind"] = cfg.get("kind", "unknown")
     out["scaling_method"] = "advanced_daily"
     out["min_value"] = min_value
     out["preserve_zeros"] = preserve_zeros

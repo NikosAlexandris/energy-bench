@@ -1,4 +1,4 @@
-import plotly.express as px
+# import plotly.express as px
 
 
 def plot_daily_fit(df_stats: pd.DataFrame, out: str) -> None:

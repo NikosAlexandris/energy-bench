@@ -21,10 +21,33 @@ def nuclear(
     conversion: str = "sum",
 ):
     """
-    Benchmark nuclear generation.
+    Benchmark nuclear generation using temporal disaggregation.
 
-    Low-frequency target:      target source Kernkraft (daily)
-    High-frequency indicator:  indicator source Nuclear (hourly)
+    Parameters
+    ----------
+    indicator_csv : Path
+        Path to high-frequency indicator CSV (e.g., ENTSO-E hourly data).
+    target_csv : Path
+        Path to low-frequency target CSV (e.g., SFOE daily data).
+    start : pd.Timestamp
+        Start timestamp for benchmarking period.
+    end : pd.Timestamp
+        End timestamp for benchmarking period.
+    indicator_time_column : str, default="DateTime"
+        Name of datetime column in indicator CSV.
+    target_time_column : str, default="Date"
+        Name of datetime column in target CSV.
+    output_dir : Path, default=Path("output")
+        Directory for output files.
+    method : str, default="chow-lin"
+        Temporal disaggregation method to use.
+    conversion : str, default="sum"
+        Conversion method for aggregation.
+
+    Notes
+    -----
+    Reconciles ENTSO-E "Nuclear" (hourly) with SFOE "Kernkraft" (daily)
+    using temporal disaggregation.
     """
     variable = "nuclear"
     benchmarked_dataframe = benchmark(

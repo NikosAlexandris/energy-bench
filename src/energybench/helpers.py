@@ -17,44 +17,57 @@ def sum_columns(
     handling missing columns based on the strict parameter. It's designed to
     work with any time series data sources.
 
-    Args:
-        df: Input DataFrame containing the columns to sum
-        columns: List of column names to sum
-        output_name: Name for the output Series
-        factor: Multiplicative factor applied to the sum (e.g., for unit conversion).
-                Default is 1.0 (no scaling).
-        strict: If True, raises ValueError when any columns are missing.
-                If False (default), warns about missing columns and continues with available ones.
+    Parameters
+    ----------
+    df : pd.DataFrame
+        Input DataFrame containing the columns to sum.
+    columns : list of str
+        List of column names to sum.
+    output_name : str
+        Name for the output Series.
+    factor : float, default=1.0
+        Multiplicative factor applied to the sum (e.g., for unit conversion).
+    strict : bool, default=False
+        If True, raises ValueError when any columns are missing.
+        If False, warns about missing columns and continues with available ones.
 
-    Returns:
-        pd.Series: Series with summed values, named according to output_name
+    Returns
+    -------
+    pd.Series
+        Series with summed values, named according to output_name.
 
-    Raises:
-        ValueError: If no columns are found (always), or if strict=True and any columns are missing
+    Raises
+    ------
+    ValueError
+        If no columns are found, or if strict=True and any columns are missing.
 
-    Examples:
-        >>> # Sum indicator columns
-        >>> indicator = sum_columns(
-        ...     df=indicator_data,
-        ...     columns=["Nuclear", "Hydro Run-of-river"],
-        ...     output_name="total_generation"
-        ... )
+    Examples
+    --------
+    Sum indicator columns:
 
-        >>> # Sum with unit conversion (MW to GWh)
-        >>> target = sum_columns(
-        ...     df=target_data,
-        ...     columns=["Kernkraft", "Flusskraft"],
-        ...     output_name="daily_total",
-        ...     factor=0.001
-        ... )
+    >>> indicator = sum_columns(
+    ...     df=indicator_data,
+    ...     columns=["Nuclear", "Hydro Run-of-river"],
+    ...     output_name="total_generation"
+    ... )
 
-        >>> # Strict mode - raise error if columns missing
-        >>> result = sum_columns(
-        ...     df=data,
-        ...     columns=["Required1", "Required2"],
-        ...     output_name="result",
-        ...     strict=True
-        ... )
+    Sum with unit conversion (MW to GWh):
+
+    >>> target = sum_columns(
+    ...     df=target_data,
+    ...     columns=["Kernkraft", "Flusskraft"],
+    ...     output_name="daily_total",
+    ...     factor=0.001
+    ... )
+
+    Strict mode - raise error if columns missing:
+
+    >>> result = sum_columns(
+    ...     df=data,
+    ...     columns=["Required1", "Required2"],
+    ...     output_name="result",
+    ...     strict=True
+    ... )
     """
     available = [c for c in columns if c in df.columns]
     missing = [c for c in columns if c not in df.columns]
@@ -135,31 +148,39 @@ def prepare_dataframe(
     - Target: Low-frequency reference values (e.g., daily, weekly)
     - Indicator: High-frequency values to be adjusted (e.g., hourly, 15-min)
 
-    Args:
-        target_series: Low-frequency reference series (e.g., daily totals)
-                      Index must be datetime-like at low frequency
-        indicator_series: High-frequency indicator series (e.g., hourly data)
-                         Index must be datetime-like at high frequency
+    Parameters
+    ----------
+    target_series : pd.Series
+        Low-frequency reference series (e.g., daily totals).
+        Index must be datetime-like at low frequency.
+    indicator_series : pd.Series
+        High-frequency indicator series (e.g., hourly data).
+        Index must be datetime-like at high frequency.
 
-    Returns:
-        pd.DataFrame: DataFrame in tempdisagg format with columns:
-            - Index: Date identifier (YYYYMMDD format)
-            - Grain: Hour of day (1-24)
-            - y: Target values (daily totals)
-            - X: Indicator values (hourly)
+    Returns
+    -------
+    pd.DataFrame
+        DataFrame in tempdisagg format with columns:
+        - Index : Date identifier (YYYYMMDD format)
+        - Grain : Hour of day (1-24)
+        - y : Target values (daily totals)
+        - X : Indicator values (hourly)
 
-    Examples:
-        >>> # Hourly indicator vs daily target
-        >>> df = prepare_dataframe(
-        ...     target_series=daily_target,
-        ...     indicator_series=hourly_indicator
-        ... )
+    Examples
+    --------
+    Hourly indicator vs daily target:
 
-        >>> # 15-minute indicator vs daily target
-        >>> df = prepare_dataframe(
-        ...     target_series=daily_target,
-        ...     indicator_series=indicator_15min
-        ... )
+    >>> df = prepare_dataframe(
+    ...     target_series=daily_target,
+    ...     indicator_series=hourly_indicator
+    ... )
+
+    15-minute indicator vs daily target:
+
+    >>> df = prepare_dataframe(
+    ...     target_series=daily_target,
+    ...     indicator_series=indicator_15min
+    ... )
     """
     target_series = target_series.copy()
     indicator_series = indicator_series.copy()

@@ -37,7 +37,7 @@ def scale_series(
         )
         for day, f in extreme_factors.head(5).items():
             daily_val = daily_sum.loc[day]
-            target_val = low_frequency_series.loc[day]
+            target_val = target_series.loc[day]
             print(
                 f"   {day.date()}: factor={f:.1f}x (daily_sum={daily_val:.4f} GWh, target={target_val:.2f} GWh)"
             )

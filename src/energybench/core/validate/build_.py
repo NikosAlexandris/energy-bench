@@ -9,22 +9,35 @@ def save_validation_table(check: pd.DataFrame, output_csv: Path) -> None:
 
 
 def build_target_series(
-    low_frequency_csv: Path,
+    target_csv: Path,
     start: pd.Timestamp,
     end: pd.Timestamp,
-    low_frequency_date_column: str = "Date",
-    low_frequency_columns: list[str] | None = None,
+    target_time_column: str = "Date",
+    target_columns: list[str] | None = None,
 ) -> pd.Series:
-    if not low_frequency_columns:
-        raise ValueError("low_frequency_columns must contain at least one column name.")
+    """
+    Build target series from low-frequency reference data.
+    
+    Args:
+        target_csv: Path to low-frequency target CSV
+        start: Start timestamp
+        end: End timestamp
+        target_time_column: Name of datetime column in target CSV
+        target_columns: List of column names to sum
+        
+    Returns:
+        Target series
+    """
+    if not target_columns:
+        raise ValueError("target_columns must contain at least one column name.")
 
-    low_frequency_series = pd.read_csv(
-        low_frequency_csv,
-        parse_dates=[low_frequency_date_column],
-        index_col=low_frequency_date_column,
+    target_df = pd.read_csv(
+        target_csv,
+        parse_dates=[target_time_column],
+        index_col=target_time_column,
     )
-    low_frequency_series = low_frequency_series.loc[start:end]
-    target = low_frequency_series[low_frequency_columns].sum(axis=1)
+    target_df = target_df.loc[start:end]
+    target = target_df[target_columns].sum(axis=1)
     target.name = "target"
 
     return target
@@ -77,7 +90,11 @@ def build_validation_table(
     low_frequency_date_column: str = "Date",
     frequency: str = "D",
 ) -> pd.DataFrame:
-    """ """
+    """
+    Build validation table (internal function - maintains old parameter names for compatibility).
+    
+    Note: This function maintains backward-compatible parameter names for internal use.
+    """
     original = build_resampled_series(
         csv_file=high_frequency_csv,
         start=start,
@@ -88,11 +105,11 @@ def build_validation_table(
         series_name="original",
     )
     target = build_target_series(
-        low_frequency_csv=low_frequency_csv,
+        target_csv=low_frequency_csv,
         start=start,
         end=end,
-        low_frequency_date_column=low_frequency_date_column,
-        low_frequency_columns=low_frequency_columns,
+        target_time_column=low_frequency_date_column,
+        target_columns=low_frequency_columns,
     )
     benchmarked = build_resampled_series(
         csv_file=benchmark_csv,

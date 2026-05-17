@@ -11,7 +11,7 @@ from energybench.models.kalman import (
     kalman_filter_1d,
     reconcile_to_daily_totals,
 )
-from energybench.validate.daily_check import build_daily_validation
+from energybench.core.validate.daily_check import build_daily_validation
 
 
 from energybench.variables import get_variable_config
@@ -115,34 +115,39 @@ def kalman_benchmark(
     observation_variance: float = 0.12,
     output_dir: Path = OUTPUT_DIR,
 ) -> tuple[Path, Path]:
-    """ """
+    """
+    Benchmark using Kalman filter (internal function - maintains old parameter names for compatibility).
+    
+    Note: This is an internal function that maintains backward-compatible parameter names.
+    The public-facing command in commands/kalman.py uses indicator/target terminology.
+    """
     cfg = get_variable_config(variable)
     output_dir.mkdir(parents=True, exist_ok=True)
 
-    high_frequency_df = read_csv(
+    indicator_df = read_csv(
         source=high_frequency_csv,
         start=start,
         end=end,
         time_column=high_frequency_datetime_column,
     )
 
-    low_frequency_df = read_csv(
+    target_df = read_csv(
         source=low_frequency_csv,
         start=start.normalize(),
         end=end.normalize(),
         time_column=low_frequency_datetime_column,
     )
 
-    high_frequency = sum_columns(
-        high_frequency_df,
-        cfg["indicator_columns"],
-        f"{variable}_high_frequency_original_gwh",
+    indicator_series = sum_columns(
+        indicator_df,
+        cfg["indicator_types"],
+        f"{variable}_indicator_original_gwh",
     )
 
-    low_frequency = sum_columns(
-        low_frequency_df,
-        cfg["target_columns"],
-        f"{variable}_low_frequency_gwh",
+    target_series = sum_columns(
+        target_df,
+        cfg["target_types"],
+        f"{variable}_target_gwh",
     )
 
     # filtered_hourly = kalman_filter_1d(
@@ -156,33 +161,25 @@ def kalman_benchmark(
     #     observation_variance=observation_variance,
     # ).rename(f"{variable}_kalman_filtered_gwh")
     filtered_hourly = kalman_filter_1d(
-        observations=high_frequency,
+        observations=indicator_series,
         process_variance=process_variance,
         observation_variance=observation_variance,
     ).rename(f"{variable}_kalman_filtered_gwh")
 
-    # reconciled_hourly = reconcile_to_daily_totals(
-    #     hourly_series=filtered_hourly,
-    #     daily_reference=low_frequency,
-    # )
-    # reconciled_hourly = reconcile_to_daily_totals(
-    #     hourly_series=filtered_hourly,
-    #     daily_reference=low_frequency,
-    # ).rename(f"{variable}_hourly_reconciled_gwh")
     reconciled_hourly = reconcile_to_daily_totals(
         hourly_series=filtered_hourly,
-        daily_reference=low_frequency,
+        daily_reference=target_series,
     ).rename(cfg["output_column"])
 
     validation = build_daily_validation(
-        original_hourly=high_frequency,
+        original_hourly=indicator_series,
         filtered_hourly=filtered_hourly,
         reconciled_hourly=reconciled_hourly,
-        daily_reference=low_frequency,
+        daily_reference=target_series,
     )
 
     hourly_out = pd.concat(
-        [high_frequency, filtered_hourly, reconciled_hourly],
+        [indicator_series, filtered_hourly, reconciled_hourly],
         axis=1,
     )
 
