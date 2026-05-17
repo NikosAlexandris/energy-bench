@@ -12,7 +12,7 @@ from energybench.core.validation import KindOfCSV
 from energybench.core.utilities import sum_columns
 from energybench.io.reading import read_csv
 from energybench.io.writing import save_dataframe
-from energybench.print.metrics import print_metrics
+from energybench.core.print.metrics import print_metrics
 from energybench.core.configuration import get_variable_config
 
 

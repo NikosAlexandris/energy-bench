@@ -1,7 +1,11 @@
 from pathlib import Path
+import sys
 from cyclopts import App
 from pandas import Timestamp
-from energybench.experiments.kalman_demo import kalman_benchmark
+
+# Import from experiments directory at project root (outside src/)
+sys.path.insert(0, str(Path(__file__).parent.parent.parent.parent / "experiments"))
+from kalman_demo import kalman_benchmark
 
 
 app = App(name="kalman", help="Benchmark high-frequency time series via a Kalman-filter")

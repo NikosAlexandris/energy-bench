@@ -1,7 +1,7 @@
 from __future__ import annotations
 from pathlib import Path
 from cyclopts import App
-from energybench.check.plausibility import plausibility_check
+from energybench.core.check.plausibility import plausibility_check
 
 
 app = App(name="plausibility", help="Physical plausibility checks.")

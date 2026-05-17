@@ -8,8 +8,8 @@ from typing import Annotated, Optional
 import cyclopts
 import pandas as pd
 
-from energybench.analyse.bias_detection import detect_bias_patterns
-from energybench.analyse.visualize import (
+from energybench.core.analyse.bias_detection import detect_bias_patterns
+from energybench.core.analyse.visualize import (
     plot_bias_detection_overview,
     plot_cluster_characteristics,
     plot_recommendation_timeline,
