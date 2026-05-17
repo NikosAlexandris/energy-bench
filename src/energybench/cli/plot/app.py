@@ -1,7 +1,7 @@
 from cyclopts import App
-from energybench.commands.plot.unified import plot_comparison
-from energybench.commands.plot.metrics import plot_comparison_metrics
-from energybench.commands.plot.assemble import plot_assembled
+from energybench.cli.plot.unified import plot_comparison
+from energybench.cli.plot.metrics import plot_comparison_metrics
+from energybench.cli.plot.assemble import plot_assembled
 
 
 plot_app = App(

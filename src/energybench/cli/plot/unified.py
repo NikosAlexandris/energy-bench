@@ -1,5 +1,5 @@
 """
-Unified comparison interface for comparing any two series.
+Unified plot interface for comparing any two series.
 """
 
 from pathlib import Path
@@ -7,19 +7,18 @@ from typing import Literal
 import pandas as pd
 from pandas import Timestamp
 
-from energybench.core.metrics import compare_series
+from energybench.core.plots.difference import plot_series_difference
 from energybench.core.validation import KindOfCSV
-from energybench.helpers import sum_columns
+from energybench.core.utilities import sum_columns
 from energybench.io.reading import read_csv
-from energybench.io.writing import save_dataframe
-from energybench.print.metrics import print_metrics
-from energybench.variables import get_variable_config
+from energybench.io.writing import save_figure, build_filename
+from energybench.core.configuration import get_variable_config
 
 
 SeriesType = Literal["indicator", "adjusted", "target"]
 
 
-def compare_series_unified(
+def plot_comparison(
     series1: SeriesType,
     series2: SeriesType,
     variable: str,
@@ -31,31 +30,35 @@ def compare_series_unified(
     target_csv: Path | None = None,
     # Optional parameters
     kind_of_adjusted: KindOfCSV = KindOfCSV.benchmarked,
-    output_csv: Path | None = None,
+    output_file: Path | None = None,
     indicator_time_column: str = "DateTime",
     target_time_column: str = "Date",
     adjusted_time_column: str = "DateTime",
-) -> pd.DataFrame:
+    series1_label: str | None = None,
+    series2_label: str | None = None,
+    xlabel: str = "Time",
+    units: str = "GWh",
+) -> None:
     """
-    Compare any two series: indicator, adjusted, or target.
+    Plot comparison between any two series: indicator, adjusted, or target.
 
     Valid combinations:
-    - indicator vs target: Shows why adjustment is needed (bias, differences)
+    - indicator vs target: Shows why adjustment is needed
     - indicator vs adjusted: Shows what changed during adjustment
     - adjusted vs target: Validates adjustment worked correctly
 
     Parameters
     ----------
     series1 : {"indicator", "adjusted", "target"}
-        First series to compare.
+        First series to plot.
     series2 : {"indicator", "adjusted", "target"}
-        Second series to compare.
+        Second series to plot.
     variable : str
         Energy type (e.g., "river", "nuclear", "solar").
     start : pd.Timestamp
-        Start timestamp for comparison period.
+        Start timestamp for plot period.
     end : pd.Timestamp
-        End timestamp for comparison period.
+        End timestamp for plot period.
     indicator_csv : Path, optional
         Path to indicator CSV file. Required if series1 or series2 is "indicator".
     adjusted_csv : Path, optional
@@ -64,20 +67,22 @@ def compare_series_unified(
         Path to target CSV file. Required if series1 or series2 is "target".
     kind_of_adjusted : KindOfCSV, default=KindOfCSV.benchmarked
         Type of adjusted series to use (benchmarked, scaled, or scaled-per-day).
-    output_csv : Path, optional
-        Path to save comparison metrics CSV. If None, metrics are not saved.
+    output_file : Path, optional
+        Path to save plot. If None, uses default naming convention.
     indicator_time_column : str, default="DateTime"
         Name of datetime column in indicator CSV.
     target_time_column : str, default="Date"
         Name of datetime column in target CSV.
     adjusted_time_column : str, default="DateTime"
         Name of datetime column in adjusted CSV.
-
-    Returns
-    -------
-    pd.DataFrame
-        DataFrame with comparison metrics including correlation, error metrics,
-        and summary statistics.
+    series1_label : str, optional
+        Custom label for series1. If None, defaults to series type name.
+    series2_label : str, optional
+        Custom label for series2. If None, defaults to series type name.
+    xlabel : str, default="Time"
+        Label for X-axis.
+    units : str, default="GWh"
+        Units for Y-axis label.
 
     Raises
     ------
@@ -86,9 +91,9 @@ def compare_series_unified(
 
     Examples
     --------
-    Compare indicator vs target to show why adjustment is needed:
+    Plot indicator vs target to show why adjustment is needed:
 
-    >>> metrics = compare_series_unified(
+    >>> plot_comparison(
     ...     series1="indicator",
     ...     series2="target",
     ...     variable="river",
@@ -98,9 +103,9 @@ def compare_series_unified(
     ...     end=pd.Timestamp("2024-12-31"),
     ... )
 
-    Compare indicator vs adjusted to show what changed:
+    Plot indicator vs adjusted to show what changed:
 
-    >>> metrics = compare_series_unified(
+    >>> plot_comparison(
     ...     series1="indicator",
     ...     series2="adjusted",
     ...     variable="river",
@@ -109,22 +114,10 @@ def compare_series_unified(
     ...     start=pd.Timestamp("2024-01-01"),
     ...     end=pd.Timestamp("2024-12-31"),
     ... )
-
-    Compare adjusted vs target to validate adjustment:
-
-    >>> metrics = compare_series_unified(
-    ...     series1="adjusted",
-    ...     series2="target",
-    ...     variable="river",
-    ...     adjusted_csv=Path("output/river_benchmarked.csv"),
-    ...     target_csv=Path("data/sfoe.csv"),
-    ...     start=pd.Timestamp("2024-01-01"),
-    ...     end=pd.Timestamp("2024-12-31"),
-    ... )
     """
     # Validate inputs
     if series1 == series2:
-        raise ValueError(f"Cannot compare series with itself: {series1}")
+        raise ValueError(f"Cannot plot series against itself: {series1}")
     
     # Check required files are provided
     required_files = {
@@ -137,7 +130,7 @@ def compare_series_unified(
         param_name, param_value = required_files[series_name]
         if param_value is None:
             raise ValueError(
-                f"--{param_name.replace('_', '-')} is required when comparing '{series_name}'"
+                f"--{param_name.replace('_', '-')} is required when plotting '{series_name}'"
             )
     
     # Get variable configuration
@@ -194,102 +187,53 @@ def compare_series_unified(
     print(f"📖 Loading {series2} series...")
     s2 = load_series(series2)
     
-    # Aggregate to daily for comparison
+    # Aggregate to daily for plotting
     print(f"📊 Aggregating to daily frequency...")
     s1_daily = s1.resample("D").sum()
     s2_daily = s2.resample("D").sum()
     
-    # Calculate metrics
-    print(f"🔬 Calculating comparison metrics...")
-    metrics = compare_series(s1_daily, s2_daily)
+    # Set default labels if not provided
+    if series1_label is None:
+        series1_label = series1.capitalize()
+    if series2_label is None:
+        series2_label = series2.capitalize()
     
-    # Calculate bias percentage
-    if metrics.mean_b not in (0, None):
-        bias_pct = (metrics.mean_a / metrics.mean_b - 1.0) * 100.0
-    else:
-        bias_pct = float("nan")
+    # Create plot
+    print(f"📊 Generating comparison plot...")
+    fig = plot_series_difference(
+        benchmarked_series=s1_daily,
+        target_series=s2_daily,
+        benchmarked_data_source=series1_label,
+        target_data_source=series2_label,
+        electricity_generation_type=cfg["label"],
+        frequency="Daily",
+        benchmarked_series_label=series1_label,
+        target_series_label=series2_label,
+        units=units,
+        xlabel=xlabel,
+    )
     
-    # Build output row
-    row = {
-        "comparison": f"{series1}_vs_{series2}",
-        "variable": variable,
-        "start": start,
-        "end": end,
-        "n_days": len(s1_daily),
-        **metrics.to_dict(),
-        "bias_pct": bias_pct,
-    }
-    
-    # Print results
-    print(f"\n{'='*70}")
-    print(f"📊 Comparison: {series1.upper()} vs {series2.upper()}")
-    print(f"{'='*70}")
-    print(f"Variable: {cfg['label']}")
-    print(f"Period: {start.date()} to {end.date()}")
-    print(f"Days: {len(s1_daily)}")
-    print(f"\nSummary Statistics:")
-    print(f"  {series1.capitalize()} - Mean: {metrics.mean_a:.4f} GWh, Std: {metrics.std_a:.4f} GWh, Sum: {metrics.sum_a:.2f} GWh")
-    print(f"  {series2.capitalize()} - Mean: {metrics.mean_b:.4f} GWh, Std: {metrics.std_b:.4f} GWh, Sum: {metrics.sum_b:.2f} GWh")
-    print(f"\nComparison Metrics:")
-    print(f"  Pearson correlation: {metrics.pearson:.4f}")
-    print(f"  Spearman correlation: {metrics.spearman:.4f}")
-    print(f"  Cosine similarity: {metrics.cosine:.4f}")
-    print(f"\nError Metrics:")
-    print(f"  Mean Bias Error (MBE): {metrics.mbe:+.4f} GWh")
-    print(f"  Mean Absolute Error (MAE): {metrics.mae:.4f} GWh")
-    print(f"  Root Mean Square Error (RMSE): {metrics.rmse:.4f} GWh")
-    print(f"  Normalized RMSE: {metrics.nrmse_mean:.2f}%")
-    print(f"  SMAPE: {metrics.smape:.2f}%")
-    print(f"  Bias: {bias_pct:+.2f}%")
-    
-    if metrics.best_lag is not None:
-        print(f"\nTemporal Analysis:")
-        print(f"  Best lag: {metrics.best_lag} days")
-        print(f"  Correlation at best lag: {metrics.best_lag_corr:.4f}")
-    
-    print(f"{'='*70}\n")
-    
-    # Save metrics if requested
-    if output_csv:
-        df = pd.DataFrame([row])
-        
-        # Reorder columns for better readability
-        preferred_order = [
-            "comparison",
-            "variable",
-            "start",
-            "end",
-            "n_days",
-            "pearson",
-            "spearman",
-            "cosine",
-            "mbe",
-            "mae",
-            "rmse",
-            "nrmse_mean",
-            "smape",
-            "bias_pct",
-            "mean_a",
-            "mean_b",
-            "std_a",
-            "std_b",
-            "sum_a",
-            "sum_b",
-            "best_lag",
-            "best_lag_corr",
-        ]
-        cols = [c for c in preferred_order if c in df.columns] + [
-            c for c in df.columns if c not in preferred_order
-        ]
-        df = df[cols]
-        
-        save_dataframe(
-            df,
-            output_csv,
-            output_csv.parent if output_csv.is_absolute() else Path("output"),
-            variable,
-            index=False,
+    # Determine output filename
+    if output_file is None:
+        filename = build_filename(
+            base_name=f"{series1}_vs_{series2}",
+            variable=variable,
+            start=start,
+            end=end,
+            suffix=".png",
         )
-        print(f"💾 Metrics saved to: {output_csv}")
+        output_dir = Path("output")
+    else:
+        filename = output_file.name
+        output_dir = output_file.parent if output_file.is_absolute() else Path("output")
     
-    return pd.DataFrame([row])
+    # Save plot
+    save_figure(
+        fig=fig,
+        filename=filename,
+        output_dir=output_dir,
+        variable=variable,
+        close_after=True,
+    )
+    
+    print(f"✅ Plot saved to: {output_dir / variable / filename}")

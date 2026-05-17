@@ -26,7 +26,7 @@ dependencies = [
 ]
 
 [project.scripts]
-nrgbnc = "energybench.cli:main"
+nrgbnc = "energybench.cli.app:main"
 
 [build-system]
 requires = ["hatchling"]

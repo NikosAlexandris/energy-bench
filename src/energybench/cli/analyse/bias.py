@@ -15,8 +15,8 @@ from energybench.analyse.visualize import (
     plot_recommendation_timeline,
 )
 from energybench.io.reading import read_csv
-from energybench.variables import get_variable_config
-from energybench.helpers import sum_columns
+from energybench.core.configuration import get_variable_config
+from energybench.core.utilities import sum_columns
 
 
 def autodetect_bias_patterns(

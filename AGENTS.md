@@ -22,23 +22,37 @@ The tool reconciles high-frequency (hourly) electricity generation data from ENT
 
 ### Architecture
 
-The project follows a modular CLI architecture:
+The project follows a modular CLI architecture with clear separation between CLI and library code:
 
 ```
 src/energybench/
-├── cli.py              # Main CLI entrypoint with cyclopts
-├── benchmark.py        # Core benchmarking logic
-├── variables.py        # Energy type configuration registry
-├── helpers.py          # Utility functions (sum_columns, prepare_dataframe)
-├── read.py            # CSV reading utilities
-├── commands/          # Subcommand implementations
+├── cli/                # All CLI commands
+│   ├── app.py         # Main CLI entrypoint with cyclopts
 │   ├── benchmark/     # Per-energy-type benchmark commands
-│   ├── compare.py     # Compare different series
-│   ├── plot.py        # Visualization commands
-│   ├── scale.py       # Scaling operations
-│   ├── validate.py    # Validation logic
-│   ├── kalman.py      # Kalman filter operations
+│   ├── compare/       # Compare commands (unified interface)
+│   ├── plot/          # Visualization commands
+│   ├── scale/         # Scaling operations
+│   ├── validate/      # Validation commands
+│   ├── analyse/       # Analysis commands
 │   └── ...
+├── core/              # Core library utilities
+│   ├── configuration.py  # Energy type registry (VARIABLES)
+│   ├── utilities.py      # Helper functions (sum_columns, prepare_dataframe)
+│   ├── metrics.py        # Comparison metrics
+│   ├── shape.py          # Shape analysis
+│   ├── validation.py     # Validation logic
+│   ├── compare/          # Compare utilities
+│   ├── plots/            # Plot utilities
+│   └── validate/         # Validation utilities
+├── models/            # Algorithms
+│   ├── benchmarking.py   # Core benchmarking logic
+│   ├── disaggregation.py # Temporal disaggregation
+│   ├── scaling.py        # Scaling methods
+│   └── kalman.py         # Kalman filtering
+├── io/                # I/O operations
+│   ├── input.py
+│   ├── output.py
+│   └── fetch.py
 └── check/             # Data quality checks
 ```
 
@@ -54,7 +68,7 @@ The tool handles seven energy types, each with specific ENTSO-E indicators and S
 6. **Wind** (aggregate): Wind ↔ Wind Onshore + Offshore
 7. **Thermal** (aggregate): Thermische Erzeugung ↔ Fossil Gas, Coal, Oil, Waste, Other
 
-Configuration for each type is centralized in `variables.py` using the `VARIABLES` registry.
+Configuration for each type is centralized in `core/configuration.py` using the `VARIABLES` registry.
 
 ## Building and Running
 

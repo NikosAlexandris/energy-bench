@@ -6,18 +6,18 @@ Benchmark, validate, plot, fetch, clean, compare, and check Swiss electricity ge
 
 from cyclopts import App
 
-from energybench.commands.list import app as list_app
-from energybench.commands.data import app as data_app
-from energybench.commands.compare.app import compare_app
-from energybench.commands.describe import app as describe_app
-from energybench.commands.plot.app import plot_app
-from energybench.commands.scale.app import scale_app
-from energybench.commands.benchmark import nuclear, river, solar, storage, thermal, water, wind
-from energybench.commands.kalman import app as kalman_app
-from energybench.commands.plausibility import app as plausibility_app
-from energybench.commands.validate.app import validate_app
-from energybench.commands.assemble import app as assemble_app
-from energybench.commands.analyse.app import analyse_app
+from energybench.cli.list import app as list_app
+from energybench.cli.data import app as data_app
+from energybench.cli.compare.app import compare_app
+from energybench.cli.describe import app as describe_app
+from energybench.cli.plot.app import plot_app
+from energybench.cli.scale.app import scale_app
+from energybench.cli.benchmark import nuclear, river, solar, storage, thermal, water, wind
+from energybench.cli.kalman import app as kalman_app
+from energybench.cli.plausibility import app as plausibility_app
+from energybench.cli.validate.app import validate_app
+from energybench.cli.assemble import app as assemble_app
+from energybench.cli.analyse.app import analyse_app
 
 app = App(
     name="energy-bench",

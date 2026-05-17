@@ -4,9 +4,9 @@ import pandas as pd
 from pandas import DataFrame, Timestamp
 from tempdisagg import TempDisaggModel
 
-from energybench.helpers import prepare_dataframe, sum_columns
+from energybench.core.utilities import prepare_dataframe, sum_columns
 from energybench.io.reading import read_csv
-from energybench.variables import get_variable_config
+from energybench.core.configuration import get_variable_config
 
 
 pd.options.mode.copy_on_write = True  # faster pandas

@@ -3,7 +3,7 @@ from __future__ import annotations
 from pathlib import Path
 import pandas as pd
 
-from energybench.variables import get_variable_config
+from energybench.core.configuration import get_variable_config
 
 
 def compare_series_types(

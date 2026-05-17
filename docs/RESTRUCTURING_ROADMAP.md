@@ -44,52 +44,82 @@ src/energybench/
 
 ---
 
-### Proposed Structure (Clear)
+### Implemented Structure (Phase 3 Complete ✅)
 
 ```
 src/energybench/
-├── core/                          # ✅ NEW: Pure library functions
-│   ├── __init__.py
-│   ├── metrics.py                 # From compare/series.py
-│   ├── shape.py                   # From compare/shape.py
-│   ├── validation.py              # From validate/build.py
-│   └── visualization.py           # From plots/*.py
-│
-├── models/                        # ✅ KEEP: Core algorithms
-│   ├── __init__.py
-│   ├── disaggregation.py         # Temporal disaggregation
-│   ├── scaling.py                # Scaling operations
-│   └── kalman.py                 # Kalman filtering
-│
-├── io/                           # ✅ KEEP: I/O operations
-│   ├── __init__.py
-│   ├── reading.py                # CSV reading (avoids shadowing built-in)
-│   ├── writing.py                # File writing (more descriptive)
-│   └── fetching.py               # Data fetching
-│
-├── commands/                     # ✅ KEEP: CLI only
-│   ├── __init__.py
-│   ├── benchmark/                # Benchmark commands
+├── cli/                          # ✅ ALL CLI code in one place
+│   ├── __init__.py              # Exports app and main
+│   ├── app.py                   # Main CLI entry (from cli.py)
+│   ├── benchmark/               # Benchmark commands
 │   │   ├── nuclear.py
 │   │   ├── river.py
-│   │   └── ...
-│   ├── compare/                  # Compare commands
+│   │   ├── solar.py
+│   │   ├── storage.py
+│   │   ├── thermal.py
+│   │   ├── water.py
+│   │   └── wind.py
+│   ├── compare/                 # Compare commands
 │   │   ├── app.py
-│   │   └── series.py
-│   ├── plot/                     # Plot commands
+│   │   ├── types.py
+│   │   └── unified.py
+│   ├── plot/                    # Plot commands
 │   │   ├── app.py
-│   │   └── ...
-│   ├── scale/                    # Scale commands
+│   │   ├── assemble.py
+│   │   ├── metrics.py
+│   │   └── unified.py
+│   ├── scale/                   # Scale commands
 │   │   ├── app.py
-│   │   └── ...
-│   └── validate/                 # Validate commands
-│       ├── app.py
-│       └── ...
+│   │   ├── simple.py
+│   │   └── advanced.py
+│   ├── validate/                # Validate commands
+│   │   ├── app.py
+│   │   ├── balance.py
+│   │   └── summary.py
+│   ├── analyse/                 # Analysis commands
+│   │   ├── app.py
+│   │   ├── bias.py
+│   │   └── methods.py
+│   ├── assemble.py
+│   ├── data.py
+│   ├── describe.py
+│   ├── kalman.py
+│   ├── list.py
+│   ├── plausibility.py
+│   └── configuration.yaml
 │
-├── cli.py                        # ✅ KEEP: Main CLI entry
-├── configuration.py              # ✅ RENAMED: From variables.py (clearer)
-├── utilities.py                  # ✅ RENAMED: From helpers.py (more standard)
-└── benchmarking.py               # ✅ RENAMED: From benchmark.py (noun form)
+├── core/                        # ✅ Core library utilities
+│   ├── __init__.py
+│   ├── configuration.py         # Energy configs (from variables.py)
+│   ├── utilities.py             # Helpers (from helpers.py)
+│   ├── metrics.py               # Comparison metrics
+│   ├── shape.py                 # Shape analysis
+│   ├── validation.py            # Validation logic
+│   ├── compare/                 # Compare utilities
+│   │   ├── specifications.py
+│   │   └── types_.py
+│   ├── plots/                   # Plot utilities (kept modular)
+│   │   ├── before_after.py
+│   │   ├── difference.py
+│   │   ├── fit.py
+│   │   └── metrics.py
+│   └── validate/                # Validation utilities
+│       ├── build_.py
+│       ├── daily_check.py
+│       └── plot.py
+│
+├── models/                      # ✅ All algorithms
+│   ├── __init__.py
+│   ├── benchmarking.py          # Main benchmarking (from benchmark.py)
+│   ├── disaggregation.py        # Temporal disaggregation
+│   ├── scaling.py               # Scaling methods
+│   └── kalman.py                # Kalman filtering
+│
+└── io/                          # ✅ I/O operations
+    ├── __init__.py
+    ├── input.py
+    ├── output.py
+    └── fetch.py
 ```
 
 **Benefits:**
@@ -571,5 +601,46 @@ See the full analysis in `docs/consolidation-recommendations.md` for:
 
 ---
 
-**Last Updated**: 2026-05-16  
-**Status**: Phase 1 Complete ✅ | Phase 2 Ready | Phase 3 Planned
+**Last Updated**: 2026-05-17  
+**Status**: Phase 1 Complete ✅ | Phase 2 Complete ✅ | Phase 3 Complete ✅
+
+## Phase 3 Implementation Summary
+
+**Completed**: 2026-05-17  
+**Files Changed**: 44  
+**Breaking Changes**: Import paths changed
+
+### What Changed
+
+1. **All CLI code moved to `cli/` directory**
+   - `cli.py` → `cli/app.py`
+   - `commands/*` → `cli/*`
+   - Created `cli/__init__.py` to export `app` and `main`
+
+2. **Core utilities consolidated in `core/`**
+   - `helpers.py` → `core/utilities.py`
+   - `variables.py` → `core/configuration.py`
+   - Kept subdirectories (compare/, plots/, validate/) for modularity
+
+3. **Updated all imports**
+   - `energybench.commands.*` → `energybench.cli.*`
+   - `energybench.helpers` → `energybench.core.utilities`
+   - `energybench.variables` → `energybench.core.configuration`
+
+4. **Updated entry point**
+   - `pyproject.toml`: `energybench.cli:main` → `energybench.cli.app:main`
+
+### Structure Benefits
+
+- ✅ Clear separation: `cli/` for commands, `core/` for library
+- ✅ No naming conflicts between CLI and library modules
+- ✅ Easy imports: `from energybench.core.utilities import ...`
+- ✅ Modular: Small, focused files instead of large consolidated modules
+- ✅ Maintainable: Clear organization, easy to navigate
+
+### Testing
+
+- ✅ `nrgbnc --help` works
+- ✅ `nrgbnc benchmark --help` works
+- ✅ `nrgbnc compare --help` works
+- ✅ All subcommands accessible

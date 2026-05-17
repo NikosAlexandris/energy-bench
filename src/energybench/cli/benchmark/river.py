@@ -2,7 +2,7 @@ from pathlib import Path
 from cyclopts import App
 from pandas import Timestamp
 from energybench.models.benchmarking import benchmark
-from energybench.variables import get_variable_config
+from energybench.core.configuration import get_variable_config
 from energybench.io.writing import save_dataframe, build_filename
 
 

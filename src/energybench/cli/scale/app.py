@@ -1,6 +1,6 @@
 from cyclopts import App
-from energybench.commands.scale.simple import scale_indicator_series
-from energybench.commands.scale.advanced import scale_indicator_series_advanced
+from energybench.cli.scale.simple import scale_indicator_series
+from energybench.cli.scale.advanced import scale_indicator_series_advanced
 
 
 scale_app = App(

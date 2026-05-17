@@ -1,5 +1,5 @@
 from typing import Optional
-from energybench.helpers import sum_columns
+from energybench.core.utilities import sum_columns
 from energybench.core.metrics import _to_series, compare_series
 import pandas as pd
 from pandas import Timestamp

@@ -1,12 +1,12 @@
 from pathlib import Path
 from energybench.io.reading import read_csv
-from energybench.variables import get_variable_config
+from energybench.core.configuration import get_variable_config
 from pandas import DataFrame, Timestamp
-from energybench.models.scaling import advanced_daily_scaling
+from energybench.models.scaling import scale_series
 from energybench.io.writing import save_dataframe, build_filename
 
 
-def scale_indicator_series_advanced(
+def scale_indicator_series(
     variable: str,
     indicator_csv: Path,
     target_csv: Path,
@@ -17,23 +17,16 @@ def scale_indicator_series_advanced(
     indicator_source: str | None = None,
     target_source: str | None = None,
     output_dir: Path = Path("output"),
-    min_value: float = 0.0,
-    preserve_zeros: bool = True,
     warn_threshold: float = 10.0,
     min_daily_sum: float = 0.01,
 ):
     """
-    Advanced daily scaling with additional constraints.
-
-    This method scales hourly values to match daily targets while:
-    - Enforcing minimum values (default: 0.0)
-    - Optionally preserving zero values in the original series
-    - Redistributing remainders across non-zero hours when preserve_zeros=True
+    Scale high-frequency indicator series to match low-frequency targets.
 
     Parameters
     ----------
     variable : str
-        Energy type (nuclear, water, river, storage, solar, wind, thermal).
+        Energy type to scale (e.g., "nuclear", "river", "solar").
     indicator_csv : Path
         Path to high-frequency indicator CSV file (e.g., hourly data).
     target_csv : Path
@@ -54,11 +47,6 @@ def scale_indicator_series_advanced(
         If None, uses default from variable configuration.
     output_dir : Path, default=Path("output")
         Directory for output files.
-    min_value : float, default=0.0
-        Minimum allowed value after scaling.
-    preserve_zeros : bool, default=True
-        If True, keeps zeros from original series and redistributes
-        remainders across non-zero hours.
     warn_threshold : float, default=10.0
         Warn if scaling factor exceeds this value.
     min_daily_sum : float, default=0.01
@@ -66,9 +54,9 @@ def scale_indicator_series_advanced(
 
     Notes
     -----
-    This advanced scaling method provides better handling of edge cases
-    compared to simple proportional scaling. It ensures non-negative values
-    and can preserve the zero-pattern of the original series.
+    This function applies simple proportional scaling to match daily totals.
+    For each day, it calculates a scaling factor and applies it uniformly
+    to all hours within that day.
     """
     cfg = get_variable_config(variable)
     output_dir.mkdir(parents=True, exist_ok=True)
@@ -93,20 +81,17 @@ def scale_indicator_series_advanced(
         columns=[indicator_time_column] + cfg["indicator_types_present"],
     ).squeeze()
 
-    scaled_series = advanced_daily_scaling(
+    scaled_series = scale_series(
         indicator_series=indicator_series,
         target_series=target_series,
-        min_value=min_value,
-        preserve_zeros=preserve_zeros,
         warn_threshold=warn_threshold,
         min_daily_sum=min_daily_sum,
     )
-
     out = DataFrame(
         {
             "DateTime": scaled_series.index,
             cfg["original_column"]: indicator_series.reindex(scaled_series.index).values,
-            cfg["scaled_advanced_output_column"]: scaled_series,
+            cfg["scaled_output_column"]: scaled_series,
         }
     )
     out["date"] = out["DateTime"].dt.date
@@ -118,12 +103,9 @@ def scale_indicator_series_advanced(
     out["target_source"] = actual_target_source
     out["target_type"] = ", ".join(cfg["target_type"])
     out["kind"] = cfg.get("kind", "unknown")
-    out["scaling_method"] = "advanced_daily"
-    out["min_value"] = min_value
-    out["preserve_zeros"] = preserve_zeros
 
     filename = build_filename(
-        base_name="hourly_scaled_advanced",
+        base_name="hourly_scaled",
         variable=variable,
         start=start,
         end=end,
@@ -137,8 +119,3 @@ def scale_indicator_series_advanced(
         variable=variable,
         index=False,
     )
-    print(f"   Settings: min_value={min_value}, preserve_zeros={preserve_zeros}")
-
-
-if __name__ == "__main__":
-    app()

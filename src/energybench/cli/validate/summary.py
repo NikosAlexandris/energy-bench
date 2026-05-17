@@ -1,7 +1,7 @@
 from pathlib import Path
 from pandas import Timestamp
 from energybench.core.validation import KindOfCSV, build_validation_table
-from energybench.variables import get_variable_config
+from energybench.core.configuration import get_variable_config
 from energybench.io.writing import save_dataframe
 
 

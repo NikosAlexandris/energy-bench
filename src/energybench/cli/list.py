@@ -1,5 +1,5 @@
 from cyclopts import App
-from energybench.variables import VARIABLES
+from energybench.core.configuration import VARIABLES
 from rich.console import Console
 from rich.table import Table
 

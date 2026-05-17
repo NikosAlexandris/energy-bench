@@ -2,7 +2,7 @@ from __future__ import annotations
 from pathlib import Path
 from pandas import Timestamp
 from energybench.core.compare.types_ import compare_series_types
-from energybench.variables import Variable
+from energybench.core.configuration import Variable
 from energybench.io.writing import save_dataframe
 
 
