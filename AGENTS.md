@@ -41,6 +41,10 @@ src/energybench/
 │   ├── metrics.py        # Comparison metrics
 │   ├── shape.py          # Shape analysis
 │   ├── validation.py     # Validation logic
+│   ├── analyse/          # Bias detection and visualization
+│   ├── check/            # Plausibility checks
+│   ├── describe/         # Statistical descriptions
+│   ├── print/            # Metrics printing
 │   ├── compare/          # Compare utilities
 │   ├── plots/            # Plot utilities
 │   └── validate/         # Validation utilities
@@ -49,11 +53,10 @@ src/energybench/
 │   ├── disaggregation.py # Temporal disaggregation
 │   ├── scaling.py        # Scaling methods
 │   └── kalman.py         # Kalman filtering
-├── io/                # I/O operations
-│   ├── input.py
-│   ├── output.py
-│   └── fetch.py
-└── check/             # Data quality checks
+└── io/                # I/O operations
+    ├── input.py
+    ├── output.py
+    └── fetch.py
 ```
 
 ### Energy Types Supported

@@ -602,7 +602,56 @@ See the full analysis in `docs/consolidation-recommendations.md` for:
 ---
 
 **Last Updated**: 2026-05-17  
-**Status**: Phase 1 Complete ✅ | Phase 2 Complete ✅ | Phase 3 Complete ✅
+**Status**: Phase 1 Complete ✅ | Phase 2 Complete ✅ | Phase 3 Complete ✅ | Phase 3.1 Complete ✅
+
+## Phase 3.1 Implementation Summary (Cleanup Orphaned Modules)
+
+**Completed**: 2026-05-17  
+**Files Changed**: 37  
+**Breaking Changes**: Import paths changed for analyse, check, describe, print modules
+
+### What Changed
+
+1. **Moved orphaned library modules to `core/`**
+   - `analyse/` → `core/analyse/` (bias detection, visualization)
+   - `check/` → `core/check/` (plausibility checks)
+   - `describe/` → `core/describe/` (statistical descriptions)
+   - `print/` → `core/print/` (metrics printing)
+
+2. **Moved non-source directories out of `src/`**
+   - `src/energybench/data/` → `data/` (CSV data files at project root)
+   - `src/energybench/experiments/` → `experiments/` (demo code at project root)
+
+3. **Updated all imports**
+   - `energybench.analyse` → `energybench.core.analyse`
+   - `energybench.check` → `energybench.core.check`
+   - `energybench.describe` → `energybench.core.describe`
+   - `energybench.print` → `energybench.core.print`
+   - Fixed `kalman_demo` import to reference `experiments/` at project root
+
+4. **Final clean structure**
+   ```
+   src/energybench/
+   ├── cli/      # All CLI commands
+   ├── core/     # All library utilities (including analyse, check, describe, print)
+   ├── models/   # All algorithms
+   └── io/       # I/O operations
+   ```
+
+### Structure Benefits
+
+- ✅ **Complete separation**: Only 4 directories in `src/energybench/`
+- ✅ **All library code in `core/`**: No orphaned modules at root level
+- ✅ **Data outside source**: CSV files and experiments at project root
+- ✅ **Consistent imports**: All library code under `energybench.core.*`
+- ✅ **Clean architecture**: Clear boundaries between CLI, library, algorithms, and I/O
+
+### Testing
+
+- ✅ `nrgbnc --help` works
+- ✅ `nrgbnc analyse --help` works
+- ✅ `nrgbnc plausibility --help` works
+- ✅ All commands using moved modules verified working
 
 ## Phase 3 Implementation Summary
 
