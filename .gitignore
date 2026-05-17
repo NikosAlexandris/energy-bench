@@ -49,9 +49,9 @@ htmlcov/
 Thumbs.db
 
 # Project specific
-output/*.png
-output/*.csv
-output/*.txt
+output/**/*.png
+output/**/*.csv
+output/**/*.txt
 !output/archived/
 test.csv
 test_*.png
