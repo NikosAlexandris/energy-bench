@@ -1,5 +1,0 @@
-variable,negative_count,missing_count,zero_count,max_ramp,mean_ramp,ramp_exceeds_threshold
-water_high_frequency_original_gwh,0,23,0,4.1591000000000005,0.5474117370640792,
-water_benchmarked_gwh,0,0,0,6.3096728812095275,0.8301432720031031,
-hour,0,0,1096,23.0,1.9158651104436757,
-month,0,0,0,11.0,0.0020910162338896704,
