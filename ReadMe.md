@@ -450,10 +450,10 @@ and plot them via a dedicated command
 nrgbnc plot metrics output/river/river_indicator_vs_target_2024_2025_metrics.csv
 ```
 ```
-💾 Plot saved to output/river/river_indicator_vs_target_2024_2025_metrics.png
+💾 Plot saved to output/river/river_indicator_vs_target_2024_2025_metrics.png)
 ```
 
-![River indicator vs target metrics, 2024-2025](output/river_indicator_vs_target_2024_2025_metrics.png)
+![River indicator vs target metrics, 2024-2025](output/river/river_indicator_vs_target_2024_2025_metrics.png)
 
 We can also let `nrgbnc` run an automated bias detection
 
@@ -725,19 +725,18 @@ Comparing adjustment methods for River...
   Methods: scaling, benchmarking, ukf
   Period:  2024-01-01 to 2025-12-31
 
-                 MAE→ind  RMSE→ind Pearson→ind  Daily Bias%  Adjusted Sum  Target Sum
--------------------------------------------------------------------------------------
+                 MAE→ind  RMSE→ind Pearson→ind  DailyBias%      AdjSum      TgtSum
+----------------------------------------------------------------------------------
      indicator    25.974    35.465    0.1693           —     16760.2     35728.0
         target         —         —         —           —           —     35728.0
-       scaling     1.084     1.502    0.1727      0.0000     35728.0     16760.2
-  benchmarking     1.083     1.479    0.1761     -0.0548     35708.4     16760.2
-           ukf     1.084     1.502    0.1727      0.0000     35728.0     16760.2
--------------------------------------------------------------------------------------
+       scaling     1.084     1.502    0.1727      0.0000     35728.0     35728.0
+  benchmarking     1.083     1.479    0.1761     -0.0548     35708.4     35728.0
+           ukf     1.084     1.502    0.1727      0.0000     35728.0     35728.0
+----------------------------------------------------------------------------------
 
 Least shape change: benchmarking (MAE vs indicator = 1.083)
 Most shape change:  scaling (MAE vs indicator = 1.084)
 All methods match daily targets (DailyBias% ≈ 0).
-* ind : indicator
 ```
 
 This runs scaling, benchmarking (Chow-Lin), and UKF on the same data

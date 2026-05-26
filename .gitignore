@@ -56,3 +56,18 @@ output/**/*.txt
 test.csv
 test_*.png
 test_*.txt
+
+# AI / opencode
+.opencode/
+opencode.json
+opencode.jsonc
+session-*.md
+AGENTS.md
+
+# Scratch / working notes
+Practice/
+examples.md
+archived/output/
+
+# Large generated data files
+data/*.csv
