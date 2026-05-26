@@ -172,7 +172,7 @@ save_dataframe(
 
 ### Scale Commands
 
-Both `scale` and `scale advanced` commands use the same pattern:
+The `scale` command (with optional advanced flags) uses the same pattern:
 
 ```python
 filename = build_filename(

@@ -43,17 +43,13 @@ This shows the initial bias in the raw ENTSO-E data:
 
 ```bash
 # Compare all energy types at once (generates metrics CSV)
-nrgbnc compare shape \
-  --high-frequency-csv data/entsoe_hourly.csv \
-  --low-frequency-csv data/sfoe_daily.csv \
+nrgbnc compare series indicator target \
+  --variable all \
+  --indicator-csv data/entsoe_hourly.csv \
+  --target-csv data/sfoe_daily.csv \
   --start 2024-01-01 \
   --end 2024-12-31 \
   --output-csv output/metrics_entsoe_vs_sfoe_2024.csv
-
-# Then visualize the bias
-nrgbnc plot metrics \
-  --metrics-csv output/metrics_entsoe_vs_sfoe_2024.csv \
-  --output output/bias_before_adjustment_2024.png
 ```
 
 **What you'll see:**
@@ -71,20 +67,20 @@ nrgbnc plot metrics \
 ```bash
 # First, scale the data (if not already done)
 nrgbnc scale river \
-  --high-frequency-csv data/entsoe_hourly.csv \
-  --low-frequency-csv data/sfoe_daily.csv \
+  --indicator-csv data/entsoe_hourly.csv \
+  --target-csv data/sfoe_daily.csv \
   --start 2024-01-01 \
-  --end 2024-12-31 \
-  --output-csv output/river_hourly_scaled_2024.csv
+  --end 2024-12-31
+  # Output: output/river/river_hourly_scaled_2024.csv
 
 # Then compare scaled vs target
-nrgbnc compare scaled-vs-target \
-  --scaled-csv output/river_hourly_scaled_2024.csv \
+nrgbnc compare series adjusted target \
+  --adjusted-csv output/river/river_hourly_scaled_2024.csv \
   --target-csv data/sfoe_daily.csv \
   --variable river \
   --start 2024-01-01 \
   --end 2024-12-31 \
-  --kind-of-csv scaled \
+  --kind-of-adjusted scaled \
   --output-csv output/river_scaled_validation_2024.csv
 ```
 
@@ -93,20 +89,20 @@ nrgbnc compare scaled-vs-target \
 ```bash
 # First, benchmark the data (if not already done)
 nrgbnc benchmark river \
-  --high-frequency-csv data/entsoe_hourly.csv \
-  --low-frequency-csv data/sfoe_daily.csv \
+  --indicator-csv data/entsoe_hourly.csv \
+  --target-csv data/sfoe_daily.csv \
   --start 2024-01-01 \
-  --end 2024-12-31 \
-  --output-csv output/river_hourly_benchmarked_2024.csv
+  --end 2024-12-31
+  # Output: output/river/river_hourly_benchmarked_2024.csv
 
 # Then compare benchmarked vs target
-nrgbnc compare scaled-vs-target \
-  --scaled-csv output/river_hourly_benchmarked_2024.csv \
+nrgbnc compare series adjusted target \
+  --adjusted-csv output/river/river_hourly_benchmarked_2024.csv \
   --target-csv data/sfoe_daily.csv \
   --variable river \
   --start 2024-01-01 \
   --end 2024-12-31 \
-  --kind-of-csv benchmarked \
+  --kind-of-adjusted benchmarked \
   --output-csv output/river_benchmarked_validation_2024.csv
 ```
 
@@ -119,17 +115,17 @@ nrgbnc compare scaled-vs-target \
 
 ### 3. Before vs After Comparison: Show Improvement
 
-This command compares original vs adjusted AND calculates bias improvement:
+This compares original vs adjusted and shows the adjustment magnitude:
 
 ```bash
-# Compare original vs scaled (shows improvement)
-nrgbnc compare shape-scaled \
-  --scaled-csv output/river_hourly_scaled_2024.csv \
-  --target-csv data/sfoe_daily.csv \
+# Compare indicator vs adjusted (shows what changed)
+nrgbnc compare series indicator adjusted \
   --variable river \
+  --indicator-csv data/entsoe_hourly.csv \
+  --adjusted-csv output/river/river_hourly_scaled_2024.csv \
+  --kind-of-adjusted scaled \
   --start 2024-01-01 \
   --end 2024-12-31 \
-  --kind-of-csv scaled \
   --output-csv output/river_improvement_metrics_2024.csv
 ```
 
@@ -152,40 +148,33 @@ To compare different adjustment methods side-by-side:
 
 ```bash
 # Generate metrics for each method
-nrgbnc compare scaled-vs-target \
-  --scaled-csv output/river_hourly_scaled_2024.csv \
+nrgbnc compare series adjusted target \
+  --adjusted-csv output/river/river_hourly_scaled_2024.csv \
   --target-csv data/sfoe_daily.csv \
   --variable river \
   --start 2024-01-01 \
   --end 2024-12-31 \
-  --kind-of-csv scaled \
-  --category-name "river_scaled" \
+  --kind-of-adjusted scaled \
   --output-csv output/river_scaled_metrics.csv
 
-nrgbnc compare scaled-vs-target \
-  --scaled-csv output/river_hourly_benchmarked_2024.csv \
+nrgbnc compare series adjusted target \
+  --adjusted-csv output/river/river_hourly_benchmarked_2024.csv \
   --target-csv data/sfoe_daily.csv \
   --variable river \
   --start 2024-01-01 \
   --end 2024-12-31 \
-  --kind-of-csv benchmarked \
-  --category-name "river_benchmarked" \
+  --kind-of-adjusted benchmarked \
   --output-csv output/river_benchmarked_metrics.csv
-
-# Combine CSVs manually or with pandas, then plot:
-nrgbnc plot metrics \
-  --metrics-csv output/combined_metrics.csv \
-  --output output/adjustment_comparison_2024.png
 ```
 
 ---
 
 ## Key Parameters
 
-- `--kind-of-csv`: Choose adjustment type
+- `--kind-of-adjusted`: Choose adjustment type
   - `scaled`: Simple daily scaling
   - `benchmarked`: Temporal disaggregation (Chow-Lin)
-  - `scaled-per-day`: Advanced per-day scaling
+  - `scaled`: Per-day proportional scaling
 
 - `--category-name`: Custom label for the comparison (useful when comparing multiple methods)
 
@@ -238,45 +227,41 @@ If you encounter this error, make sure you're using the latest version of the co
 Here's a complete workflow for analyzing bias before and after adjustment:
 
 ```bash
-# 1. Analyze original bias (all energy types)
-nrgbnc compare shape \
-  --high-frequency-csv ../data/ENTSOE/entsoe_hourly_2016_2025.csv \
-  --low-frequency-csv ../data/SFOE/swissgrid_daily_production_2016_2025.csv \
+# 1. Analyze original bias
+nrgbnc compare series indicator target \
+  --variable river \
+  --indicator-csv data/entsoe_hourly_2016_2025.csv \
+  --target-csv data/sfoe_daily_2016_2025.csv \
   --start 2018-01-01 \
   --end 2024-12-31 \
   --output-csv output/metrics_original_2018_2024.csv
 
-# 2. Visualize original bias
-nrgbnc plot metrics \
-  --metrics-csv output/metrics_original_2018_2024.csv \
-  --output output/bias_original_2018_2024.png
-
-# 3. Scale the river data
+# 2. Scale the river data
 nrgbnc scale river \
-  --high-frequency-csv ../data/ENTSOE/entsoe_hourly_2016_2025.csv \
-  --low-frequency-csv ../data/SFOE/swissgrid_daily_production_2016_2025.csv \
+  --indicator-csv data/entsoe_hourly_2016_2025.csv \
+  --target-csv data/sfoe_daily_2016_2025.csv \
   --start 2018-01-01 \
-  --end 2024-12-31 \
-  --output-csv output/river_hourly_scaled_2018_2024.csv
+  --end 2024-12-31
+  # Output: output/river/river_hourly_scaled_2018_2024.csv
 
-# 4. Compare scaled vs target
-nrgbnc compare scaled-vs-target \
-  --scaled-csv output/river_hourly_scaled_2018_2024.csv \
-  --target-csv ../data/SFOE/swissgrid_daily_production_2016_2025.csv \
+# 3. Compare scaled vs target
+nrgbnc compare series adjusted target \
+  --adjusted-csv output/river/river_hourly_scaled_2018_2024.csv \
+  --target-csv data/sfoe_daily_2016_2025.csv \
   --variable river \
   --start 2018-01-01 \
   --end 2024-12-31 \
-  --kind-of-csv scaled \
+  --kind-of-adjusted scaled \
   --output-csv output/river_scaled_validation_2018_2024.csv
 
-# 5. Show improvement
-nrgbnc compare shape-scaled \
-  --scaled-csv output/river_hourly_scaled_2018_2024.csv \
-  --target-csv ../data/SFOE/swissgrid_daily_production_2016_2025.csv \
+# 4. Compare indicator vs adjusted (shows what changed)
+nrgbnc compare series indicator adjusted \
   --variable river \
+  --indicator-csv data/entsoe_hourly_2016_2025.csv \
+  --adjusted-csv output/river/river_hourly_scaled_2018_2024.csv \
+  --kind-of-adjusted scaled \
   --start 2018-01-01 \
   --end 2024-12-31 \
-  --kind-of-csv scaled \
   --output-csv output/river_improvement_2018_2024.csv
 ```
 

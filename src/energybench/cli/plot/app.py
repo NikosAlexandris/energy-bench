@@ -1,5 +1,5 @@
 from cyclopts import App
-from energybench.cli.plot.unified import plot_comparison
+from energybench.cli.plot.unified import plot_comparison, plot_totals_comparison
 from energybench.cli.plot.metrics import plot_comparison_metrics
 from energybench.cli.plot.assemble import plot_assembled
 
@@ -9,11 +9,15 @@ plot_app = App(
     help="Plot comparisons between indicator, adjusted, and target series",
 )
 
-# Unified interface for plotting comparisons
-plot_app.command(
-    name="compare",
-    help="Plot comparison between any two series: indicator, adjusted, or target",
-)(plot_comparison)
+# Nested sub-app for "compare" with default command and totals subcommand
+compare_app = App(name="compare", help="Plot comparison between any two series")
+compare_app.default(plot_comparison)
+compare_app.command(
+    name="totals",
+    help="Plot sum of all energy types vs a reference series (e.g. Swissgrid)",
+)(plot_totals_comparison)
+
+plot_app.command(compare_app)
 
 # Specialized plot commands
 plot_app.command(

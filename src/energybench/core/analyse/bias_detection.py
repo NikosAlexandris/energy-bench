@@ -86,7 +86,7 @@ class SubperiodRecommendation:
 
     start: pd.Timestamp
     end: pd.Timestamp
-    recommended_method: Literal["scaling", "benchmarking", "advanced_scaling", "kalman"]
+    recommended_method: Literal["scaling", "benchmarking", "kalman"]
     confidence: float
     reason: str
     expected_improvement: dict[str, float]
@@ -399,12 +399,9 @@ def cluster_periods(
         elif abs(mean_bias) > 20 or mean_pearson < 0.7:
             method = "benchmarking"
             confidence = 0.8
-        elif mean_mae > mean_rmse * 0.8:
-            method = "advanced_scaling"
-            confidence = 0.75
         else:
             method = "kalman"
-            confidence = 0.7
+            confidence = 0.75
 
         periods = [(w.start, w.end) for w in cluster_windows]
 
@@ -493,8 +490,6 @@ def recommend_adjustment_strategy(
 
         # Calculate period statistics
         mean_bias = np.mean([w.bias_pct for w in period_windows])
-        _mean_mae = np.mean([w.mae for w in period_windows])  # Calculated but not used yet
-        _mean_rmse = np.mean([w.rmse for w in period_windows])  # Calculated but not used yet
         mean_pearson = np.mean([w.pearson for w in period_windows])
 
         # Determine method and confidence
@@ -507,22 +502,14 @@ def recommend_adjustment_strategy(
             reason = f"Part of cluster {cluster_id} with {cluster.n_periods} similar periods"
         else:
             # Fallback logic
-            if abs(mean_bias) < 5 and mean_pearson > 0.9:
-                method = "scaling"
-                confidence = 0.85
-                reason = "Low bias and high correlation - simple scaling sufficient"
-            elif abs(mean_bias) > 20:
+            if abs(mean_bias) > 20 or mean_pearson < 0.7:
                 method = "benchmarking"
                 confidence = 0.8
-                reason = f"High bias ({mean_bias:+.1f}%) requires temporal disaggregation"
-            elif mean_pearson < 0.7:
-                method = "benchmarking"
-                confidence = 0.75
-                reason = f"Low correlation ({mean_pearson:.2f}) suggests shape mismatch"
+                reason = f"High bias ({mean_bias:+.1f}%) or low correlation ({mean_pearson:.2f}) suggests temporal disaggregation"
             else:
-                method = "advanced_scaling"
-                confidence = 0.7
-                reason = "Moderate bias with good correlation - advanced scaling recommended"
+                method = "scaling"
+                confidence = 0.85
+                reason = "Low bias with good correlation - scaling sufficient"
             cluster_id = None
 
         # Estimate expected improvement

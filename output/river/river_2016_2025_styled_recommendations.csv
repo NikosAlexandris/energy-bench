@@ -1,5 +1,0 @@
-start,end,method,confidence,reason,cluster_id,expected_bias_reduction_pct,expected_mae_reduction_pct,expected_rmse_reduction_pct
-2025-01-03,2025-04-04,scaling,0.85,Low bias and high correlation - simple scaling sufficient,,5.302596295591728e-05,30.0,25.0
-2016-01-01,2024-12-06,benchmarking,0.8,High bias (-90.0%) requires temporal disaggregation,,80.99403365282677,50.0,45.0
-2025-04-04,2025-06-06,advanced_scaling,0.7,Moderate bias with good correlation - advanced scaling recommended,,8.942508674559472,30.0,25.0
-2025-07-04,2026-01-11,advanced_scaling,0.7,Moderate bias with good correlation - advanced scaling recommended,,13.410285393429277,30.0,25.0

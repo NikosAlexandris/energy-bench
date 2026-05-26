@@ -21,7 +21,7 @@ def daily_balance(
     
     Args:
         csv_to_validate: Path to CSV file to validate (benchmarked/scaled output)
-        kind_of_csv: Type of CSV (benchmarked, scaled, scaled-per-day)
+        kind_of_csv: Type of CSV (benchmarked or scaled)
         target_csv: Path to low-frequency target CSV (e.g., daily reference data)
         start: Start timestamp for validation period
         end: End timestamp for validation period
@@ -35,7 +35,6 @@ def daily_balance(
     kind_of_value_column = {
         "benchmarked": cfg["benchmarked_column"],
         "scaled": cfg["scaled_column"],
-        "scaled-per-day": cfg["scaled_advanced_column"],
     }
 
     if kind_of_csv not in kind_of_value_column:

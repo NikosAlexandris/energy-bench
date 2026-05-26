@@ -1,10 +1,10 @@
 [project]
 name = "energybench"  # nrg-bench
-version = "0.1.0"
+version = "0.2.0"
 description = "Energy-Bench (nrgbnc) is a temporal disaggregation & benchmarking tool for (Swiss) electricity generation time series"
 readme = "ReadMe.md"
 requires-python = ">=3.14"
-license = {text = "MIT"}
+license = {text = "CC0-1.0"}
 authors = [{name = "Your Name", email = "you@example.com"}]
 classifiers = [
     "Development Status :: 4 - Beta",
@@ -17,6 +17,7 @@ dependencies = [
     "tempdisagg>=0.2.13",
     "cyclopts>=2.6",
     "matplotlib>=3.8",
+    "filterpy>=1.4.4",
     "polars>=1.0",
     "pyarrow>=24.0.0",
     "requests>=2.33.1",

@@ -1,6 +1,0 @@
-mlr --csv label DateTime,Thermische,Wind_ENTSOE,Wind_Kalman,Source_Hourly,Source_Daily,Variable,Daily_Columns,Hourly_Columns,Nuclear_ENTSOE,Nuclear_Kalman,Water_ENTSOE,Water_Kalman,Solar_ENTSOE,Solar_Kalman then reorder -f DateTime,Water_ENTSOE,Water_Kalman,Nuclear_ENTSOE,Nuclear_Kalman,Solar_ENTSOE,Solar_Kalman,Wind_ENTSOE,Wind_Kalman,Thermische,Source_Hourly,Hourly_Columns,Source_Daily,Daily_Columns,Variable kalman_hourly_all_with_thermische_GWh.csv > kalman_hourly_2024_2025_GWh.csv^C
-
-mlr --csv put '
-  $Sum_ENTSOE = $Water_ENTSOE + $Nuclear_ENTSOE + $Solar_ENTSOE + $Wind_ENTSOE;
-  $Sum_SFOE   = $Water_Kalman + $Nuclear_Kalman + $Solar_Kalman + $Wind_Kalman + $Thermische
-' kalman_hourly_2024_2025_GWh.csv > kalman_hourly_2024_2025_with_totals_GWh.csv

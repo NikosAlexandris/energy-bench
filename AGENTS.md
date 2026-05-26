@@ -238,3 +238,60 @@ This tool addresses the challenge of creating consistent hourly electricity gene
 4. Validating results against known totals and plausibility checks
 
 The `archived/` directory contains previous iterations and validation results. The `output/` directory stores current benchmarked series, metrics, and visualizations.
+
+---
+
+## Session History
+
+### Goal
+Develop a Python CLI tool for benchmarking energy time series, with emphasis on temporal disaggregation, visualization, bias detection, and validation against Swissgrid data.
+
+### Key Decisions
+- Single `scale` command replaces `simple`/`advanced` split — global scaling factor rejected as too crude for multi-year data.
+- UKF is 1D hourly filter + daily reconciliation, not 24D — proved mathematically equivalent to `scale`, kept only as experimental comparison.
+- **Chow-Lin (`tempdisagg`) is the only genuinely different method** — it models the indicator-target relationship via regression, not proportional scaling. Improvement is ~3% on MAE vs Swissgrid.
+- **Regime-splicing approach rejected** — methods are too similar (scale ≡ UKF, benchmark only marginally different) for per-regime method selection to add value.
+- **Plot column/factor overrides** are optional (`None`/`1.0` by default) — when omitted, falls through to existing config-based lookup. Fully backward-compatible.
+- `--variable` cannot be restricted to a cyclopts enum because `--variable all` also needs to be valid; help text lists valid values, runtime validation via `get_variable_config()`.
+- **Atomic types only** for Swissgrid validation: exclude `water` (aggregate of river+storage) to avoid triple-counting. Remaining 6 types sum to 1.07× Swissgrid (7% over) — a reasonable data-source methodology difference.
+- **Totals discovery uses glob patterns**, not filename construction — avoids mismatch between query date range and file's date range.
+
+### Commands
+| Subcommand | Behavior |
+|---|---|
+| `plot compare <s1> <s2>` | Original: compare two series for one/all variables |
+| `plot compare totals --auto` | **NEW**: sum all atomic-type CSVs from `auto_dir/{var}/` and compare vs a reference CSV |
+| `plot compare totals --total-csv` | **NEW**: compare a single pre-computed total CSV vs reference |
+
+### Swissgrid Data
+- Located at `data/clean/EnergieUebersichtCH-{year}_production_wide.csv`
+- Columns: `ds` (datetime), per-canton, total (`Summe produzierte Energie...`), grid feed-in
+- Units: kWh → use `--reference-factor 1e-6` for GWh
+- Total = sum of cantons + foreign territories
+- Our 6-type atomic sum = 1.07× Swissgrid (7% overcount = methodology difference)
+
+### Relevant Files
+- `src/energybench/cli/plot/unified.py`: `plot_totals_comparison()`, `_find_component_csv()`, `_get_component_column()`, `_ATOMIC_VARIABLES`
+- `src/energybench/cli/plot/app.py`: `compare_app` with default + totals subcommand
+
+---
+
+## Session Changelog
+
+### 2026-05-21: Docs cleanup & compare_methods bugfix
+
+**Bugfix** (`scripts/compare_methods.py`):
+- Scatter plot crashed with `"x and y must be the same size"` because Swissgrid 2024 has 8785 hours (includes hour 0 of 2025-01-01) while indicator totals have 8784. Fixed by aligning on common index via `index.intersection()`.
+- Changed scatter from 1-week window to full year per the user's request. Updated title and filename from `scatter_week.png` to `scatter_full_year.png`.
+
+**`docs/understanding_the_data.md` cleaned** (surgical, no pipeline removal):
+- Removed dangling empty footnote `[^]`
+- Removed conflicting platform footnote definitions (`[^1]`-`[^4]`, `[^16]`, `[^17]`) embedded in the Swissgrid section that overrode the bottom References section
+- Fixed broken markdown link: `(opendata.swiss)[opendata.swiss]` → `[opendata.swiss](url)`
+- Removed two "___Stuff to clean-up___" banners
+- Cleaned Benchmarking section: removed 6 empty subsections (Prepare/Benchmarking/Evaluate with raw `..`/`...` placeholders and corrupted `xtxt` math), replaced with 2-line intro
+- Renamed "Further" → "Combining Speicherkraft types"
+- Renamed "Unsorted..." → "Daily comparison with scaling factors"
+- Removed 12 dangling `[^7]`, `[^9]`, `[^10]` editorial footnote markers in Methods section
+- Updated TOC to match all renamed/removed sections
+- All 22 Miller commands, 2 curl downloads, 12 code blocks, and all data tables preserved intact

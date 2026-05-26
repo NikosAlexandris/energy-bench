@@ -26,7 +26,7 @@ Result: Scaled values become [2.08, 2.08, 2.08, ...] → huge spikes!
 
 ## Built-in Validation Features
 
-Both `scale` and `scale advanced` commands now include automatic validation:
+The `scale` command (with optional advanced flags) now includes automatic validation:
 
 ### Default Parameters
 
@@ -39,8 +39,8 @@ Both `scale` and `scale advanced` commands now include automatic validation:
 
 ```bash
 nrgbnc scale river \
-  --high-frequency-csv data/entsoe_hourly.csv \
-  --low-frequency-csv data/sfoe_daily.csv \
+  --indicator-csv data/entsoe_hourly.csv \
+  --target-csv data/sfoe_daily.csv \
   --start 2024-01-01 \
   --end 2024-01-31
 ```
@@ -66,16 +66,16 @@ nrgbnc scale river \
 ```bash
 # More sensitive (warn at 5x)
 nrgbnc scale river \
-  --high-frequency-csv data/entsoe_hourly.csv \
-  --low-frequency-csv data/sfoe_daily.csv \
+  --indicator-csv data/entsoe_hourly.csv \
+  --target-csv data/sfoe_daily.csv \
   --start 2024-01-01 \
   --end 2024-12-31 \
   --warn-threshold 5.0
 
 # Less sensitive (warn at 20x)
 nrgbnc scale river \
-  --high-frequency-csv data/entsoe_hourly.csv \
-  --low-frequency-csv data/sfoe_daily.csv \
+  --indicator-csv data/entsoe_hourly.csv \
+  --target-csv data/sfoe_daily.csv \
   --start 2024-01-01 \
   --end 2024-12-31 \
   --warn-threshold 20.0
@@ -86,16 +86,16 @@ nrgbnc scale river \
 ```bash
 # Stricter (skip scaling if sum < 0.1 GWh)
 nrgbnc scale river \
-  --high-frequency-csv data/entsoe_hourly.csv \
-  --low-frequency-csv data/sfoe_daily.csv \
+  --indicator-csv data/entsoe_hourly.csv \
+  --target-csv data/sfoe_daily.csv \
   --start 2024-01-01 \
   --end 2024-12-31 \
   --min-daily-sum 0.1
 
 # More lenient (skip only if sum < 0.001 GWh)
 nrgbnc scale river \
-  --high-frequency-csv data/entsoe_hourly.csv \
-  --low-frequency-csv data/sfoe_daily.csv \
+  --indicator-csv data/entsoe_hourly.csv \
+  --target-csv data/sfoe_daily.csv \
   --start 2024-01-01 \
   --end 2024-12-31 \
   --min-daily-sum 0.001
@@ -103,20 +103,21 @@ nrgbnc scale river \
 
 ---
 
-## Advanced Scaling Protection
+## Scaling with Constraints
 
-The `scale advanced` command includes additional protection:
+The `scale` command with advanced flags includes additional protection:
 
 ### Automatic Skip for Very Small Sums
 
-When `min_daily_sum` threshold is triggered, the advanced method **skips scaling** for those days and keeps original values:
+When `min_daily_sum` threshold is triggered, scaling **skips scaling** for those days and keeps original values:
 
 ```bash
-nrgbnc scale advanced river \
-  --high-frequency-csv data/entsoe_hourly.csv \
-  --low-frequency-csv data/sfoe_daily.csv \
+nrgbnc scale river \
+  --indicator-csv data/entsoe_hourly.csv \
+  --target-csv data/sfoe_daily.csv \
   --start 2024-01-01 \
   --end 2024-12-31 \
+  --min-value 0.0 --preserve-zeros \
   --min-daily-sum 0.1
 ```
 
@@ -133,13 +134,13 @@ nrgbnc scale advanced river \
 ### Combined with Other Constraints
 
 ```bash
-nrgbnc scale advanced river \
-  --high-frequency-csv data/entsoe_hourly.csv \
-  --low-frequency-csv data/sfoe_daily.csv \
+nrgbnc scale river \
+  --indicator-csv data/entsoe_hourly.csv \
+  --target-csv data/sfoe_daily.csv \
   --start 2024-01-01 \
   --end 2024-12-31 \
   --min-value 0.0 \
-  --preserve-zeros true \
+  --preserve-zeros \
   --warn-threshold 10.0 \
   --min-daily-sum 0.05
 ```
@@ -154,8 +155,8 @@ Run scaling with default validation to see warnings:
 
 ```bash
 nrgbnc scale river \
-  --high-frequency-csv data/entsoe_hourly.csv \
-  --low-frequency-csv data/sfoe_daily.csv \
+  --indicator-csv data/entsoe_hourly.csv \
+  --target-csv data/sfoe_daily.csv \
   --start 2024-01-01 \
   --end 2024-12-31
 ```
@@ -183,7 +184,7 @@ nrgbnc scale river ... --warn-threshold 20.0
 **Option B: Skip problematic days** (if data is unreliable)
 ```bash
 # Use higher min-daily-sum to skip scaling
-nrgbnc scale advanced river ... --min-daily-sum 1.0
+nrgbnc scale river ... --min-value 0.0 --preserve-zeros --min-daily-sum 1.0
 ```
 
 **Option C: Fix source data** (if data is clearly wrong)
@@ -204,14 +205,15 @@ The defaults (`warn-threshold=10.0`, `min-daily-sum=0.01`) are reasonable for mo
 
 ### 3. Use Advanced Scaling for Critical Data
 
-When data quality is uncertain, use `scale advanced` with protection:
+When data quality is uncertain, use `scale` with constraints:
 
 ```bash
-nrgbnc scale advanced river \
-  --high-frequency-csv data/entsoe_hourly.csv \
-  --low-frequency-csv data/sfoe_daily.csv \
+nrgbnc scale river \
+  --indicator-csv data/entsoe_hourly.csv \
+  --target-csv data/sfoe_daily.csv \
   --start 2024-01-01 \
   --end 2024-12-31 \
+  --min-value 0.0 --preserve-zeros \
   --min-daily-sum 0.1  # Skip days with very small sums
 ```
 
@@ -230,11 +232,11 @@ nrgbnc scale river ... --warn-threshold 15.0
 After scaling, always validate the output:
 
 ```bash
-nrgbnc validate river \
+nrgbnc validate summary \
   --csv-to-validate output/river_hourly_scaled_2024.csv \
-  --kind-of-csv scaled \
-  --high-frequency-csv data/entsoe_hourly.csv \
-  --low-frequency-csv data/sfoe_daily.csv \
+  --indicator-csv data/entsoe_hourly.csv \
+  --target-csv data/sfoe_daily.csv \
+  --variable river \
   --start 2024-01-01 \
   --end 2024-12-31
 ```
@@ -250,7 +252,7 @@ nrgbnc validate river \
 **Solutions**:
 1. Check data quality in source files
 2. Increase `warn-threshold` if factors are acceptable
-3. Use `scale advanced` with higher `min-daily-sum`
+3. Use `scale` with higher `min-daily-sum` and constraints
 
 ### Spikes at End of Time Range
 
@@ -260,7 +262,7 @@ nrgbnc validate river \
 
 **Solutions**:
 1. Adjust `end` date to exclude incomplete days
-2. Use `scale advanced` with `min-daily-sum` protection
+2. Use `scale` with `min-daily-sum` protection
 3. Fix source data to include complete days
 
 ### Inconsistent Results
@@ -270,7 +272,7 @@ nrgbnc validate river \
 **Cause**: Variable data quality in hourly series
 
 **Solutions**:
-1. Use `scale advanced` for more consistent results
+1. Use `scale` with constraints for more consistent results
 2. Apply data cleaning before scaling
 3. Use benchmarking instead of scaling for better temporal consistency
 
@@ -293,7 +295,7 @@ elif abs(factor) > warn_threshold:
     print(f"Warning: extreme factor {factor}x")
 ```
 
-### Advanced Scaling Algorithm
+### Scaling with Constraints
 
 ```python
 for each day:

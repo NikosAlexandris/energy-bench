@@ -70,8 +70,8 @@ scaled_hourly = hourly * factor
 **Command:**
 ```bash
 nrgbnc scale river \
-  --high-frequency-csv data/entsoe_hourly.csv \
-  --low-frequency-csv data/sfoe_daily.csv \
+  --indicator-csv data/entsoe_hourly.csv \
+  --target-csv data/sfoe_daily.csv \
   --start 2025-01-01 \
   --end 2026-12-31
 ```
@@ -90,13 +90,13 @@ nrgbnc scale river \
 
 **Command:**
 ```bash
-nrgbnc scale advanced river \
-  --high-frequency-csv data/entsoe_hourly.csv \
-  --low-frequency-csv data/sfoe_daily.csv \
+nrgbnc scale river \
+  --indicator-csv data/entsoe_hourly.csv \
+  --target-csv data/sfoe_daily.csv \
   --start 2025-01-01 \
   --end 2026-12-31 \
   --min-value 0.0 \
-  --preserve-zeros true \
+  --preserve-zeros \
   --min-daily-sum 1.5
 ```
 
@@ -116,8 +116,8 @@ nrgbnc scale advanced river \
 **Command:**
 ```bash
 nrgbnc benchmark river \
-  --high-frequency-csv data/entsoe_hourly.csv \
-  --low-frequency-csv data/sfoe_daily.csv \
+  --indicator-csv data/entsoe_hourly.csv \
+  --target-csv data/sfoe_daily.csv \
   --start 2016-01-01 \
   --end 2024-12-31
 ```
@@ -138,8 +138,8 @@ nrgbnc benchmark river \
 **Command:**
 ```bash
 nrgbnc kalman river \
-  --high-frequency-csv data/entsoe_hourly.csv \
-  --low-frequency-csv data/sfoe_daily.csv \
+  --indicator-csv data/entsoe_hourly.csv \
+  --target-csv data/sfoe_daily.csv \
   --start 2016-01-01 \
   --end 2024-12-31
 ```
@@ -178,7 +178,9 @@ nrgbnc benchmark river \
   --output-dir output/historical
 
 # 2025-2026: Use scaling
-nrgbnc scale advanced river \
+nrgbnc scale river \
+  --indicator-csv data/entsoe_hourly.csv \
+  --target-csv data/sfoe_daily.csv \
   --start 2025-01-01 \
   --end 2026-12-31 \
   --output-dir output/recent
@@ -200,17 +202,17 @@ components:
     end: 2024-12-31
     
   - name: river_recent
-    csv: output/recent/river_hourly_scaled_advanced_2025_2026.csv
-    column: river_scaled_per_day_gwh
+    csv: output/recent/river_hourly_scaled_2025_2026.csv
+    column: river_scaled_gwh
     start: 2025-01-01
     end: 2026-12-31
 ```
 
 **Step 3: Assemble**
 ```bash
-nrgbnc assemble \
+nrgbnc assemble assemble-total \
   --config config/river_assembly.yaml \
-  --output output/river_hourly_assembled_2016_2026.csv
+  --output-csv output/river_hourly_assembled_2016_2026.csv
 ```
 
 ---
@@ -224,34 +226,20 @@ The 15-minute total production data can be used in several ways:
 Compare assembled hourly totals against 15-minute aggregated totals:
 
 ```bash
-# Aggregate 15-min to hourly
-nrgbnc aggregate \
-  --csv data/swissgrid_15min_total.csv \
-  --from-frequency 15min \
-  --to-frequency 1h \
-  --output data/swissgrid_hourly_total.csv
-
-# Validate assembled series
-nrgbnc validate total \
-  --assembled-csv output/assembled_total_2016_2026.csv \
-  --reference-csv data/swissgrid_hourly_total.csv \
-  --start 2016-01-01 \
-  --end 2026-12-31
+# Validate assembled series against Swissgrid total
+nrgbnc plot compare totals \
+  --total-csv output/assembled_total_2016_2026.csv \
+  --reference-csv data/swissgrid_hourly_total.csv
 ```
 
-### Option 2: As Additional Indicator
+### Option 2: As Validation Reference
 
-Use as a constraint in temporal disaggregation:
+Use the `plot compare totals` command to compare assembled totals against Swissgrid:
 
-```python
-# In benchmarking, add total production as additional indicator
-# This helps preserve the overall temporal pattern
-nrgbnc benchmark river \
-  --high-frequency-csv data/entsoe_hourly.csv \
-  --low-frequency-csv data/sfoe_daily.csv \
-  --additional-indicator data/swissgrid_hourly_total.csv \
-  --start 2016-01-01 \
-  --end 2024-12-31
+```bash
+nrgbnc plot compare totals \
+  --total-csv output/assembled_total.csv \
+  --reference-csv data/clean/swissgrid_hourly_total.csv
 ```
 
 ### Option 3: For Sub-Hourly Disaggregation
@@ -259,14 +247,12 @@ nrgbnc benchmark river \
 Disaggregate hourly to 15-minute using the total production pattern:
 
 ```bash
-# First create hourly series
-nrgbnc benchmark river --start 2024-01-01 --end 2024-12-31
-
-# Then disaggregate to 15-min using total production pattern
-nrgbnc disaggregate \
-  --hourly-csv output/river_hourly_benchmarked_2024.csv \
-  --pattern-csv data/swissgrid_15min_total.csv \
-  --output output/river_15min_2024.csv
+# First benchmark to create hourly series
+nrgbnc benchmark river \
+  --indicator-csv data/entsoe_hourly.csv \
+  --target-csv data/sfoe_daily.csv \
+  --start 2024-01-01 \
+  --end 2024-12-31
 ```
 
 ### Option 4: For Quality Checks
@@ -274,15 +260,11 @@ nrgbnc disaggregate \
 Check if sum of type-specific series matches total production:
 
 ```bash
-# Assemble all types
-nrgbnc assemble total --config config/all_types.yaml
-
-# Compare with SwissGrid total
-nrgbnc compare \
-  --csv-a output/assembled_total.csv \
-  --csv-b data/swissgrid_hourly_total.csv \
-  --metric rmse \
-  --metric bias
+# Compare assembled total with SwissGrid total
+nrgbnc plot compare totals \
+  --total-csv output/assembled_total.csv \
+  --reference-csv data/clean/swissgrid_hourly_total.csv \
+  --metrics
 ```
 
 ---
@@ -294,10 +276,11 @@ nrgbnc compare \
 Verify that hourly sums match daily targets:
 
 ```bash
-nrgbnc validate river \
+nrgbnc validate summary \
   --csv-to-validate output/river_hourly_assembled.csv \
-  --kind-of-csv benchmarked \
-  --low-frequency-csv data/sfoe_daily.csv \
+  --indicator-csv data/entsoe_hourly.csv \
+  --target-csv data/sfoe_daily.csv \
+  --variable river \
   --start 2016-01-01 \
   --end 2026-12-31
 ```
@@ -307,12 +290,11 @@ nrgbnc validate river \
 Compare different methods for the same period:
 
 ```bash
-nrgbnc compare \
-  --csv-a output/river_scaled.csv \
-  --csv-b output/river_benchmarked.csv \
-  --metric rmse \
-  --metric bias \
-  --metric correlation
+nrgbnc compare series indicator adjusted \
+  --variable river \
+  --indicator-csv data/entsoe_hourly.csv \
+  --adjusted-csv output/river_benchmarked.csv \
+  --kind-of-adjusted benchmarked
 ```
 
 ### 3. Plausibility Checks
@@ -331,16 +313,19 @@ nrgbnc plausibility river \
 Plot results for manual review:
 
 ```bash
-# Before vs after
-nrgbnc plot before-vs-after river \
-  --csv output/river_hourly_assembled.csv \
+# Indicator vs adjusted
+nrgbnc plot compare indicator adjusted \
+  --variable river \
+  --indicator-csv data/entsoe_hourly.csv \
+  --adjusted-csv output/river_hourly_assembled.csv \
   --start 2024-01-01 \
   --end 2024-12-31
 
-# Original vs target
-nrgbnc plot original-vs-target river \
-  --high-frequency-csv data/entsoe_hourly.csv \
-  --low-frequency-csv data/sfoe_daily.csv \
+# Indicator vs target
+nrgbnc plot compare indicator target \
+  --variable river \
+  --indicator-csv data/entsoe_hourly.csv \
+  --target-csv data/sfoe_daily.csv \
   --start 2024-01-01 \
   --end 2024-12-31
 ```
@@ -362,7 +347,7 @@ metadata:
       method: "benchmarking"
       reason: "ENTSO-E data incomplete (8-27x underreporting)"
     - period: "2025-2026"
-      method: "advanced_scaling"
+      method: "scaling"
       reason: "ENTSO-E data nearly complete (1.1x ratio)"
 ```
 
@@ -421,9 +406,9 @@ def select_best_method(data_quality_score):
     if score < 0.3:  # Very poor
         return "benchmarking"
     elif score < 0.7:  # Poor
-        return "advanced_scaling"
+        return "scaling"
     else:  # Good
-        return "simple_scaling"
+        return "scaling"
 ```
 
 ### 2. Multi-Indicator Disaggregation

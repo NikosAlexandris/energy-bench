@@ -105,12 +105,12 @@ nrgbnc compare series adjusted target \
   --start 2024-01-01 \
   --end 2024-12-31
 
-# Compare scaled-per-day vs target
+# Compare scaled vs target
 nrgbnc compare series adjusted target \
   --variable river \
-  --adjusted-csv output/river/river_hourly_scaled_advanced_2024_2024.csv \
+  --adjusted-csv output/river/river_hourly_scaled_2024_2024.csv \
   --target-csv data/sfoe_daily.csv \
-  --kind-of-adjusted scaled-per-day \
+  --kind-of-adjusted scaled \
   --start 2024-01-01 \
   --end 2024-12-31
 ```

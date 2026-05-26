@@ -69,11 +69,11 @@ This creates **artificially high scaling factors** that distort the temporal pat
 All scaling operations for `river` variable are affected:
 
 ```bash
-# Simple scaling - affected 2016-2024
+# Scaling - affected 2016-2024
 nrgbnc scale river ...
 
-# Advanced scaling - affected 2016-2024  
-nrgbnc scale advanced river ...
+# Scaling with constraints - affected 2016-2024  
+nrgbnc scale river --min-value 0.0 --preserve-zeros
 ```
 
 ---
@@ -85,12 +85,13 @@ nrgbnc scale advanced river ...
 Skip scaling for days with unreliable data:
 
 ```bash
-nrgbnc scale advanced river \
-  --high-frequency-csv data/entsoe_hourly.csv \
-  --low-frequency-csv data/sfoe_daily.csv \
+nrgbnc scale river \
+  --indicator-csv data/entsoe_hourly.csv \
+  --target-csv data/sfoe_daily.csv \
   --start 2016-01-01 \
   --end 2024-12-31 \
-  --min-daily-sum 2.0  # Skip days with sum < 2.0 GWh
+  --min-daily-sum 2.0 \
+  --min-value 0.0 --preserve-zeros  # Skip days with sum < 2.0 GWh
 ```
 
 **Pros:**
@@ -108,8 +109,8 @@ Benchmarking (Chow-Lin) is more robust to systematic bias:
 
 ```bash
 nrgbnc benchmark river \
-  --high-frequency-csv data/entsoe_hourly.csv \
-  --low-frequency-csv data/sfoe_daily.csv \
+  --indicator-csv data/entsoe_hourly.csv \
+  --target-csv data/sfoe_daily.csv \
   --start 2016-01-01 \
   --end 2024-12-31
 ```
@@ -159,8 +160,8 @@ If historical data is not critical, use only the reliable period:
 
 ```bash
 nrgbnc scale river \
-  --high-frequency-csv data/entsoe_hourly.csv \
-  --low-frequency-csv data/sfoe_daily.csv \
+  --indicator-csv data/entsoe_hourly.csv \
+  --target-csv data/sfoe_daily.csv \
   --start 2025-01-01 \
   --end 2026-12-31
 ```
@@ -182,9 +183,10 @@ nrgbnc scale river \
 
 ```bash
 # Compare ENTSO-E vs SFOE for a specific year
-nrgbnc compare river \
-  --csv-a data/entsoe_hourly.csv \
-  --csv-b data/sfoe_daily.csv \
+nrgbnc compare series indicator target \
+  --variable river \
+  --indicator-csv data/entsoe_hourly.csv \
+  --target-csv data/sfoe_daily.csv \
   --start 2020-01-01 \
   --end 2020-12-31
 ```
@@ -192,10 +194,11 @@ nrgbnc compare river \
 ### Visualize the Systematic Bias
 
 ```bash
-# Plot original vs target to see the gap
-nrgbnc plot original-vs-target river \
-  --high-frequency-csv data/entsoe_hourly.csv \
-  --low-frequency-csv data/sfoe_daily.csv \
+# Plot indicator vs target to see the gap
+nrgbnc plot compare indicator target \
+  --variable river \
+  --indicator-csv data/entsoe_hourly.csv \
+  --target-csv data/sfoe_daily.csv \
   --start 2016-01-01 \
   --end 2026-12-31
 ```
@@ -222,20 +225,19 @@ nrgbnc plot original-vs-target river \
 ```bash
 # Process 2016-2024 with benchmarking
 nrgbnc benchmark river \
+  --indicator-csv data/entsoe_hourly.csv \
+  --target-csv data/sfoe_daily.csv \
   --start 2016-01-01 \
   --end 2024-12-31 \
   --output-dir output/historical
 
 # Process 2025+ with scaling
 nrgbnc scale river \
+  --indicator-csv data/entsoe_hourly.csv \
+  --target-csv data/sfoe_daily.csv \
   --start 2025-01-01 \
   --end 2026-12-31 \
   --output-dir output/recent
-
-# Combine results
-nrgbnc assemble river \
-  --csv-files output/historical/river_*.csv output/recent/river_*.csv \
-  --output output/river_combined.csv
 ```
 
 ---

@@ -52,6 +52,7 @@ def save_dataframe(
     variable: str | None = None,
     index: bool = False,
     date_format: str | None = "%Y-%m-%d %H:%M:%S",
+    quiet: bool = False,
     **kwargs: Any,
 ) -> Path:
     """
@@ -64,18 +65,11 @@ def save_dataframe(
         variable: Energy type for subdirectory (e.g., "river")
         index: Whether to write index (default: False)
         date_format: Format for datetime columns (default: ISO-like)
+        quiet: Suppress output messages (default: False)
         **kwargs: Additional arguments passed to df.to_csv()
 
     Returns:
         Path where file was saved
-
-    Example:
-        >>> save_dataframe(
-        ...     df=benchmarked_df,
-        ...     filename="river_hourly_benchmarked_2025.csv",
-        ...     variable="river",
-        ... )
-        Path('output/river/river_hourly_benchmarked_2025.csv')
     """
     output_path = _ensure_output_path(output_dir, variable, filename)
 
@@ -86,7 +80,8 @@ def save_dataframe(
         **kwargs,
     )
 
-    print(f"💾 CSV saved to {output_path}")
+    if not quiet:
+        print(f"💾 CSV saved to {output_path}")
     return output_path
 
 
@@ -101,6 +96,7 @@ def save_figure(
     edgecolor: str = "none",
     pad_inches: float = 0.08,
     close_after: bool = False,
+    quiet: bool = False,
     **kwargs: Any,
 ) -> Path:
     """
@@ -117,20 +113,11 @@ def save_figure(
         edgecolor: Edge color (default: "none")
         pad_inches: Padding (default: 0.08)
         close_after: Whether to close figure after saving (default: False)
+        quiet: Suppress output messages (default: False)
         **kwargs: Additional arguments passed to plt.savefig()
 
     Returns:
         Path where file was saved
-
-    Example:
-        >>> fig, ax = plt.subplots()
-        >>> ax.plot([1, 2, 3])
-        >>> save_figure(
-        ...     fig=fig,
-        ...     filename="river_plot_2025.png",
-        ...     variable="river",
-        ... )
-        Path('output/river/river_plot_2025.png')
     """
     output_path = _ensure_output_path(output_dir, variable, filename)
 
@@ -150,7 +137,8 @@ def save_figure(
     if close_after:
         plt.close(fig)
 
-    print(f"💾 Plot saved to {output_path}")
+    if not quiet:
+        print(f"💾 Plot saved to {output_path}")
     return output_path
 
 

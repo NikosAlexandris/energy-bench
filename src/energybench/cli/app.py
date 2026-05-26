@@ -13,6 +13,7 @@ from energybench.cli.describe import app as describe_app
 from energybench.cli.plot.app import plot_app
 from energybench.cli.scale.app import scale_app
 from energybench.cli.benchmark import nuclear, river, solar, storage, thermal, water, wind
+from energybench.cli.benchmark import all_variables as benchmark_all
 from energybench.cli.kalman import app as kalman_app
 from energybench.cli.plausibility import app as plausibility_app
 from energybench.cli.validate.app import validate_app
@@ -46,6 +47,7 @@ benchmark_app.command(storage.app, name="storage")
 benchmark_app.command(wind.app, name="wind")
 benchmark_app.command(solar.app, name="solar")
 benchmark_app.command(thermal.app, name="thermal")
+benchmark_app.command(benchmark_all.app, name="all")
 
 list_app.sort_key = 1
 data_app.sort_key = 2

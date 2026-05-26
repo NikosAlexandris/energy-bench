@@ -4,7 +4,6 @@ from pandas import Timestamp
 from energybench.models.benchmarking import benchmark
 from energybench.io.writing import save_dataframe, build_filename
 
-
 app = App(help="Benchmark thermal generation.")
 
 
@@ -47,7 +46,7 @@ def thermal(
     Notes
     -----
     Reconciles ENTSO-E thermal sources (Fossil Gas, Coal, Oil, Waste, Other)
-    (hourly) with SFOE "Thermische Erzeugung" (daily) using temporal
+    (hourly) with SFOE "Thermische" (daily) using temporal
     disaggregation.
     """
     variable = "thermal"

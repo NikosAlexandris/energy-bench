@@ -8,9 +8,10 @@ from typing import Optional
 import matplotlib.pyplot as plt
 import matplotlib.patches as mpatches
 import numpy as np
-import pandas as pd
 
 from energybench.core.analyse.bias_detection import BiasDetectionResult
+from matplotlib.lines import Line2D
+from energybench.io.writing import save_figure
 
 
 # Swiss-inspired color palette (Tufte style)
@@ -19,6 +20,9 @@ SOFT_GREY = "#808080"
 MID_GREY = "0.65"
 LIGHT_GREY = "#C7C7C7"
 DARK_GREY = "0.35"
+
+# Color-blind safe qualitative palette (Wong, Nature Methods 2011 — lightened for backgrounds)
+CLUSTER_COLORS = ["#E69F00", "#56B4E9", "#009E73", "#CC79A7", "#0072B2"]
 
 
 def set_tufte_style():
@@ -65,19 +69,31 @@ def apply_spine_style(ax):
     ax.spines["bottom"].set_color(DARK_GREY)
 
 
+def _draw_cluster_bands(ax, clusters):
+    """Draw soft background bands for each cluster on a time-axis axes.
+
+    Each cluster gets a pastel vertical band across the full y-range.
+    Bands are drawn below data lines (zorder=-10) with no border.
+    """
+    for i, cluster in enumerate(clusters):
+        color = CLUSTER_COLORS[i % len(CLUSTER_COLORS)]
+        for start, end in cluster.periods:
+            ax.axvspan(start, end, alpha=0.15, color=color, lw=0, zorder=-10)
+
+
 def plot_bias_detection_overview(
     result: BiasDetectionResult,
     output_path: Optional[Path] = None,
-    figsize: tuple[float, float] = (16, 14),
+    figsize: tuple[float, float] = (16, 10),
     dpi: int = 100,
 ) -> None:
     """
     Create comprehensive visualization of bias detection results.
 
     6-panel layout:
-    Row 1: Bias %, MAE/RMSE, Correlation
-    Row 2: Daily Comparison, Correlation Stability, Confidence Timeline
-    Row 3: Recommended Methods (full width)
+    Row 1: Daily Comparison, Bias %, Error metrics
+    Row 2: Shape similarity, Correlation Stability (or empty)
+    Row 3: Recommended Methods timeline (full width, with confidence)
 
     Parameters
     ----------
@@ -108,123 +124,87 @@ def plot_bias_detection_overview(
     # Method colors (Swiss palette)
     method_colors = {
         "scaling": LIGHT_GREY,
-        "advanced_scaling": MID_GREY,
         "benchmarking": SWISS_RED,
         "kalman": SOFT_GREY,
     }
 
-    # Create figure with 3 rows
+    # Create figure with 3 rows (two full rows + slim timeline row)
     fig = plt.figure(figsize=figsize)
     gs = fig.add_gridspec(
-        3,
-        3,
-        height_ratios=[1, 1, 0.6],
-        hspace=0.35,
-        wspace=0.3,
-        left=0.08,
-        right=0.96,
-        top=0.94,
-        bottom=0.06,
+        3, 3,
+        height_ratios=[0.65, 0.65, 0.3],
+        hspace=0.3, wspace=0.28,
+        left=0.07, right=0.97, top=0.88, bottom=0.06,
     )
 
-    # Row 1: Bias, Errors, Correlation
-    ax1 = fig.add_subplot(gs[0, 0])
-    ax2 = fig.add_subplot(gs[0, 1])
-    ax3 = fig.add_subplot(gs[0, 2])
+    # Row 1 — "How different are the series?"
+    ax1 = fig.add_subplot(gs[0, 0])  # Daily means
+    ax2 = fig.add_subplot(gs[0, 1])  # Bias %
+    ax3 = fig.add_subplot(gs[0, 2])  # Error metrics
 
-    # Row 2: Daily Comparison, Correlation Stability, Confidence
-    ax4 = fig.add_subplot(gs[1, 0])
-    ax5 = fig.add_subplot(gs[1, 1])
-    ax6 = fig.add_subplot(gs[1, 2])
+    # Row 2 — "How reliable is the relationship?"
+    ax4 = fig.add_subplot(gs[1, 0])  # Shape similarity
+    ax5 = fig.add_subplot(gs[1, 1])  # Correlation stability
+    ax6 = fig.add_subplot(gs[1, 2])  # (spare)
 
-    # Row 3: Methods Timeline (full width)
+    # Row 3 — "What to do?" (full width)
     ax7 = fig.add_subplot(gs[2, :])
 
-    # Apply spine styling to all axes
+    # Apply spine styling
     for ax in [ax1, ax2, ax3, ax4, ax5, ax6, ax7]:
         apply_spine_style(ax)
 
-    # ===== Panel 1: Bias percentage over time =====
-    ax1.plot(
-        timestamps,
-        bias_pct,
-        "o-",
-        color=SWISS_RED,
-        linewidth=1.5,
-        markersize=3,
-        alpha=0.8,
-        label="Bias %",
-    )
-    ax1.axhline(y=0, color=MID_GREY, linestyle="-", alpha=0.8, linewidth=1)
-    ax1.axhline(y=5, color=SOFT_GREY, linestyle=":", alpha=0.6, linewidth=0.8)
-    ax1.axhline(y=-5, color=SOFT_GREY, linestyle=":", alpha=0.6, linewidth=0.8)
-    ax1.fill_between(timestamps, -5, 5, alpha=0.08, color=LIGHT_GREY)
+    # Cluster bands on all time-based panels
+    if result.clusters:
+        for ax in [ax1, ax2, ax3, ax4, ax5]:
+            _draw_cluster_bands(ax, result.clusters)
 
-    # Mark changepoints
-    for cp in result.changepoints:
-        if cp.metric_changed == "bias_pct":
-            ax1.axvline(x=cp.timestamp, color=SWISS_RED, linestyle="--", alpha=0.4, linewidth=1)
-
-    ax1.set_ylabel("Bias (%)", fontweight="normal")
-    ax1.set_title("Bias over time", fontweight="normal", pad=8)
+    # Panel 1: Daily means — the raw data
+    ax1.plot(timestamps, mean_indicator, linewidth=1.2, color=LIGHT_GREY, alpha=0.9, label="Indicator")
+    ax1.plot(timestamps, mean_target, linewidth=1.2, color=SWISS_RED, alpha=0.9, label="Target")
+    ax1.set_ylabel("Daily mean (GWh)", fontweight="normal")
+    ax1.set_title("Daily means", fontweight="normal", pad=4)
+    ax1.legend(loc="upper right", fontsize=8, frameon=False)
     ax1.grid(True, alpha=0.3, linewidth=0.5)
 
-    # ===== Panel 2: MAE and RMSE over time =====
-    ax2.plot(
-        timestamps, mae, "o-", linewidth=1.5, markersize=3, label="MAE", color=SOFT_GREY, alpha=0.8
-    )
-    ax2.plot(
-        timestamps, rmse, "s-", linewidth=1.5, markersize=3, label="RMSE", color=MID_GREY, alpha=0.8
-    )
-
-    # Mark changepoints
+    # Panel 2: Bias %
+    ax2.plot(timestamps, bias_pct, "o-", color=SWISS_RED, linewidth=1.5, markersize=3, alpha=0.8)
+    ax2.axhline(y=0, color=MID_GREY, linestyle="-", alpha=0.8, linewidth=1)
+    ax2.axhline(y=5, color=SOFT_GREY, linestyle=":", alpha=0.6, linewidth=0.8)
+    ax2.axhline(y=-5, color=SOFT_GREY, linestyle=":", alpha=0.6, linewidth=0.8)
+    ax2.fill_between(timestamps, -5, 5, alpha=0.08, color=LIGHT_GREY)
     for cp in result.changepoints:
-        if cp.metric_changed in ["mae", "rmse"]:
+        if cp.metric_changed == "bias_pct":
             ax2.axvline(x=cp.timestamp, color=SWISS_RED, linestyle="--", alpha=0.4, linewidth=1)
-
-    ax2.set_ylabel("Error (GWh)", fontweight="normal")
-    ax2.set_title("Error metrics", fontweight="normal", pad=8)
-    ax2.legend(loc="upper right", fontsize=8, frameon=False)
+    ax2.set_ylabel("Bias (%)", fontweight="normal")
+    ax2.set_title("Bias over time", fontweight="normal", pad=4)
     ax2.grid(True, alpha=0.3, linewidth=0.5)
 
-    # ===== Panel 3: Correlation over time =====
-    ax3.plot(
-        timestamps,
-        pearson,
-        "o-",
-        linewidth=1.5,
-        markersize=3,
-        label="Pearson r",
-        color=SOFT_GREY,
-        alpha=0.8,
-    )
-    ax3.axhline(y=0.9, color=SWISS_RED, linestyle=":", alpha=0.5, linewidth=0.8)
-    ax3.axhline(y=0.7, color=SOFT_GREY, linestyle=":", alpha=0.5, linewidth=0.8)
-    ax3.fill_between(timestamps, 0.9, 1.0, alpha=0.08, color=LIGHT_GREY)
-
-    # Mark changepoints
+    # Panel 3: Error metrics
+    ax3.plot(timestamps, mae, "o-", linewidth=1.5, markersize=3, label="MAE", color=SOFT_GREY, alpha=0.8)
+    ax3.plot(timestamps, rmse, "s-", linewidth=1.5, markersize=3, label="RMSE", color=MID_GREY, alpha=0.8)
     for cp in result.changepoints:
-        if cp.metric_changed == "pearson":
+        if cp.metric_changed in ["mae", "rmse"]:
             ax3.axvline(x=cp.timestamp, color=SWISS_RED, linestyle="--", alpha=0.4, linewidth=1)
-
-    ax3.set_ylabel("Correlation", fontweight="normal")
-    ax3.set_title("Shape similarity", fontweight="normal", pad=8)
-    ax3.set_ylim(0, 1.05)
+    ax3.set_ylabel("Error (GWh)", fontweight="normal")
+    ax3.set_title("Error metrics", fontweight="normal", pad=4)
+    ax3.legend(loc="upper right", fontsize=8, frameon=False)
     ax3.grid(True, alpha=0.3, linewidth=0.5)
 
-    # ===== Panel 4: Daily Aggregation Comparison =====
-    ax4.plot(
-        timestamps, mean_indicator, linewidth=1.2, color=LIGHT_GREY, alpha=0.9, label="Indicator"
-    )
-    ax4.plot(timestamps, mean_target, linewidth=1.2, color=SWISS_RED, alpha=0.9, label="Target")
-
-    ax4.set_ylabel("Daily mean (GWh)", fontweight="normal")
-    ax4.set_title("Daily aggregation", fontweight="normal", pad=8)
-    ax4.legend(loc="upper right", fontsize=8, frameon=False)
+    # Panel 4: Shape similarity (correlation)
+    ax4.plot(timestamps, pearson, "o-", linewidth=1.5, markersize=3, color=SOFT_GREY, alpha=0.8)
+    ax4.axhline(y=0.9, color=SWISS_RED, linestyle=":", alpha=0.5, linewidth=0.8)
+    ax4.axhline(y=0.7, color=SOFT_GREY, linestyle=":", alpha=0.5, linewidth=0.8)
+    ax4.fill_between(timestamps, 0.9, 1.0, alpha=0.08, color=LIGHT_GREY)
+    for cp in result.changepoints:
+        if cp.metric_changed == "pearson":
+            ax4.axvline(x=cp.timestamp, color=SWISS_RED, linestyle="--", alpha=0.4, linewidth=1)
+    ax4.set_ylabel("Correlation", fontweight="normal")
+    ax4.set_title("Shape similarity", fontweight="normal", pad=4)
+    ax4.set_ylim(0, 1.05)
     ax4.grid(True, alpha=0.3, linewidth=0.5)
 
-    # ===== Panel 5: Correlation Stability =====
-    # Calculate rolling correlation stability (variance in correlation)
+    # Panel 5: Correlation stability (derivative of panel 4)
     if len(pearson) > 5:
         window = 5
         corr_stability = []
@@ -233,299 +213,127 @@ def plot_bias_detection_overview(
             corr_window = pearson[i : i + window]
             corr_stability.append(np.std(corr_window))
             corr_timestamps.append(timestamps[i + window // 2])
-
-        ax5.plot(
-            corr_timestamps,
-            corr_stability,
-            "o-",
-            linewidth=1.5,
-            markersize=3,
-            color=SOFT_GREY,
-            alpha=0.8,
-        )
-        ax5.axhline(
-            y=0.05,
-            color=SWISS_RED,
-            linestyle=":",
-            alpha=0.5,
-            linewidth=0.8,
-            label="Stability threshold",
-        )
+        ax5.plot(corr_timestamps, corr_stability, "o-", linewidth=1.5, markersize=3, color=SOFT_GREY, alpha=0.8)
+        ax5.axhline(y=0.05, color=SWISS_RED, linestyle=":", alpha=0.5, linewidth=0.9, label="Stable")
         ax5.fill_between(corr_timestamps, 0, 0.05, alpha=0.08, color=LIGHT_GREY)
-
-    ax5.set_ylabel("Correlation std dev", fontweight="normal")
+    ax5.set_ylabel("Correlation σ", fontweight="normal")
     ax5.set_title("Correlation stability", fontweight="normal", pad=8)
     ax5.legend(loc="upper right", fontsize=8, frameon=False)
     ax5.grid(True, alpha=0.3, linewidth=0.5)
 
-    # ===== Panel 6: Confidence Timeline =====
-    if result.recommendations:
-        # Extract confidence scores over time
-        rec_starts = [rec.start for rec in result.recommendations]
-        rec_confidence = [rec.confidence for rec in result.recommendations]
-        rec_methods = [rec.recommended_method for rec in result.recommendations]
-
-        # Plot confidence as line with method-colored markers
-        for i, (start, conf, method) in enumerate(zip(rec_starts, rec_confidence, rec_methods)):
-            color = method_colors.get(method, SOFT_GREY)
-            ax6.plot(start, conf, "o", markersize=5, color=color, alpha=0.8)
-
-        # Connect with line
-        ax6.plot(rec_starts, rec_confidence, "-", linewidth=1, color=MID_GREY, alpha=0.5)
-
-        ax6.axhline(
-            y=0.8, color=SWISS_RED, linestyle=":", alpha=0.5, linewidth=0.8, label="High confidence"
-        )
-        ax6.fill_between([min(rec_starts), max(rec_starts)], 0.8, 1.0, alpha=0.08, color=LIGHT_GREY)
-
-    ax6.set_ylabel("Confidence", fontweight="normal")
-    ax6.set_title("Recommendation confidence", fontweight="normal", pad=8)
+    # Panel 6: Bias vs correlation scatter — colored by cluster
+    if result.clusters:
+        # Assign each window to a cluster
+        cluster_of_window = [-1] * len(timestamps)
+        for ci, cl in enumerate(result.clusters):
+            for start, end in cl.periods:
+                for i, ts in enumerate(timestamps):
+                    if start <= ts <= end:
+                        cluster_of_window[i] = ci
+        scatter_colors = [
+            CLUSTER_COLORS[ci % len(CLUSTER_COLORS)] if ci >= 0 else SOFT_GREY
+            for ci in cluster_of_window
+        ]
+    else:
+        scatter_colors = [SOFT_GREY] * len(timestamps)
+    ax6.scatter(bias_pct, pearson, c=scatter_colors, s=12, alpha=0.8, edgecolors="none", zorder=5)
+    ax6.axvline(x=0, color=MID_GREY, linestyle="-", alpha=0.5, linewidth=0.8)
+    ax6.axhline(y=0.9, color=SWISS_RED, linestyle=":", alpha=0.4, linewidth=0.6)
+    ax6.axhline(y=0.7, color=SOFT_GREY, linestyle=":", alpha=0.4, linewidth=0.6)
+    ax6.set_xlabel("Bias (%)", fontweight="normal")
+    ax6.set_ylabel("Correlation", fontweight="normal")
+    ax6.set_title("Bias vs correlation", fontweight="normal", pad=4)
     ax6.set_ylim(0, 1.05)
-    ax6.legend(loc="lower right", fontsize=8, frameon=False)
     ax6.grid(True, alpha=0.3, linewidth=0.5)
 
-    # ===== Panel 7: Recommended Methods Timeline =====
-    if result.recommendations:
-        sorted_recs = sorted(result.recommendations, key=lambda x: x.start)
-
-        for i, rec in enumerate(sorted_recs):
-            duration = (rec.end - rec.start).days
-            color = method_colors.get(rec.recommended_method, SOFT_GREY)
-
-            # Bar height based on confidence
-            height = rec.confidence * 0.8
-
-            ax7.barh(
-                0,
-                duration,
-                left=rec.start,
-                height=height,
-                color=color,
-                alpha=0.7,
-                edgecolor=DARK_GREY,
-                linewidth=0.5,
+    # Cluster legend on scatter panel (lower-right)
+    if result.clusters:
+        # ax6.text(
+        #     0.98, 0.03, "Clusters", transform=ax6.transAxes, fontsize=9,
+        #     color=DARK_GREY, va="bottom", ha="right", fontweight="bold",
+        # )
+        for i, cl in enumerate(result.clusters):
+            color = CLUSTER_COLORS[i % len(CLUSTER_COLORS)]
+            # y = 0.03 + 0.13 * (len(result.clusters) - i)
+            y = 0.08 * (len(result.clusters) - i)
+            ax6.plot(0.96, y, "s", color=color, markersize=15,
+                     transform=ax6.transAxes, clip_on=False, zorder=20)
+            ax6.text(
+                0.88, y,
+                f"Cluster {i}:  {cl.n_periods} win  bias {cl.mean_bias_pct:+.0f}%  r {cl.mean_pearson:.2f}",
+                transform=ax6.transAxes, fontsize=8, color=DARK_GREY,
+                va="center", ha="right",
             )
 
-            # Add method label if space allows
-            mid_point = rec.start + (rec.end - rec.start) / 2
-            if duration > 20:  # Only show text for periods > 20 days
-                method_short = rec.recommended_method.replace("_", "\n")
-                ax7.text(
-                    mid_point,
-                    0,
-                    method_short,
-                    ha="center",
-                    va="center",
-                    fontsize=7,
-                    fontweight="normal",
-                    color="white" if rec.recommended_method == "benchmarking" else "0.2",
-                )
+    # Panel 7: Methods timeline — y-axis encodes confidence
+    if result.recommendations:
+        sorted_recs = sorted(result.recommendations, key=lambda x: x.start)
+        present_methods = sorted({rec.recommended_method for rec in sorted_recs})
 
-        # Create legend
-        legend_patches = [
-            mpatches.Patch(color=color, label=method.replace("_", " ").title(), alpha=0.7)
-            for method, color in method_colors.items()
-        ]
-        ax7.legend(handles=legend_patches, loc="upper right", fontsize=8, ncol=4, frameon=False)
+        for rec in sorted_recs:
+            color = method_colors.get(rec.recommended_method, SOFT_GREY)
+            y = rec.confidence
 
-        ax7.set_ylabel("Confidence\n(bar height)", fontweight="normal", fontsize=8)
-        ax7.set_yticks([])
-        ax7.set_ylim(-0.5, 0.5)
-    else:
-        ax7.text(
-            0.5,
-            0.5,
-            "No recommendations generated",
-            ha="center",
-            va="center",
-            transform=ax7.transAxes,
-            fontsize=10,
-            color=SOFT_GREY,
+            # Horizontal line at confidence level
+            ax7.plot([rec.start, rec.end], [y, y], color=color, linewidth=2.5, alpha=0.8, solid_capstyle="round")
+
+            # Dot at start and end of each segment
+            ax7.plot(rec.start, y, "o", color=color, markersize=4, alpha=0.9)
+            ax7.plot(rec.end, y, "o", color=color, markersize=4, alpha=0.9)
+
+        dummy_handles = [Line2D([0], [0], alpha=0) for _ in present_methods]
+        legend = ax7.legend(
+            handles=dummy_handles,
+            labels=[m.replace("_", " ").title() for m in present_methods],
+            loc="lower left", fontsize=11, ncol=len(present_methods),
+            frameon=False, handlelength=0, handletextpad=0,
         )
+        for text, method in zip(legend.get_texts(), present_methods):
+            text.set_color(method_colors[method])
+
+        ax7.set_ylabel("Confidence", fontweight="normal", fontsize=8)
+        ax7.set_ylim(0, 1.1)
+        ax7.set_yticks([0, 0.25, 0.5, 0.75, 1.0])
+        ax7.yaxis.grid(True, alpha=0.2, linewidth=0.4)
+    else:
+        ax7.text(0.5, 0.5, "No recommendations generated", ha="center", va="center",
+                 transform=ax7.transAxes, fontsize=9, color=SOFT_GREY)
         ax7.set_yticks([])
 
     ax7.set_xlabel("Date", fontweight="normal")
-    ax7.set_title("Recommended adjustment methods", fontweight="normal", pad=8)
-    ax7.grid(True, alpha=0.3, axis="x", linewidth=0.5)
+    ax7.set_title("Recommended adjustment methods", fontweight="normal", pad=6)
+    ax7.grid(True, alpha=0.15, axis="x", linewidth=0.4)
 
-    # Format x-axis for all time-based plots
-    for ax in [ax1, ax2, ax3, ax4, ax5, ax6, ax7]:
-        ax.tick_params(axis="x", rotation=0)
-        fig.autofmt_xdate(rotation=45, ha="right")
+    # X-axis: row 1 hides labels; row 2 gets compact horizontal labels; row 3 rotated
+    for ax in [ax1, ax2, ax3]:
+        ax.tick_params(axis="x", labelbottom=False)
+    for ax in [ax4, ax5]:
+        ax.tick_params(axis="x", labelsize=7)
+    for label in ax7.get_xticklabels():
+        label.set_rotation(45)
+        label.set_ha("right")
+    ax7.xaxis.set_tick_params(pad=2)
 
     # Overall title
     fig.suptitle(
-        f"Bias Detection Analysis: {result.variable}\n"
+        f"Bias Detection Analysis: {result.variable}\n\n"
         f"Overall Bias: {result.overall_bias_pct:+.2f}% | "
         f"MAE: {result.overall_mae:.2f} | "
         f"RMSE: {result.overall_rmse:.2f} | "
         f"Changepoints: {len(result.changepoints)} | "
         f"Clusters: {len(result.clusters)}",
-        fontsize=13,
+        fontsize=12,
         fontweight="normal",
-        y=0.98,
+        y=0.975,
+        linespacing=1.4,
     )
 
     if output_path:
-        output_path.parent.mkdir(parents=True, exist_ok=True)
-        plt.savefig(output_path, dpi=dpi, bbox_inches="tight", facecolor="white")
-        print(f"📊 Visualization saved to: {output_path}")
+        save_figure(fig=fig, filename=output_path.name, output_dir=output_path.parent,
+                    variable=None, close_after=True, dpi=dpi)
     else:
         plt.show()
-
-    plt.close()
-
-
-def plot_cluster_characteristics(
-    result: BiasDetectionResult,
-    output_path: Optional[Path] = None,
-    figsize: tuple[float, float] = (12, 8),
-    dpi: int = 100,
-) -> None:
-    """
-    Visualize characteristics of detected clusters with Swiss styling.
-
-    Parameters
-    ----------
-    result : BiasDetectionResult
-        Detection results with clusters
-    output_path : Path, optional
-        Path to save figure
-    figsize : tuple
-        Figure size in inches
-    dpi : int
-        Resolution for saved figure
-    """
-    set_tufte_style()
-
-    if not result.clusters:
-        print("No clusters to visualize")
-        return
-
-    fig, axes = plt.subplots(2, 2, figsize=figsize)
-
-    # Apply spine styling to all axes
-    for ax_row in axes:
-        for ax in ax_row:
-            apply_spine_style(ax)
-
-    cluster_ids = [c.cluster_id for c in result.clusters]
-    n_periods = [c.n_periods for c in result.clusters]
-    mean_bias = [c.mean_bias_pct for c in result.clusters]
-    mean_mae = [c.mean_mae for c in result.clusters]
-    mean_rmse = [c.mean_rmse for c in result.clusters]
-    mean_pearson = [c.mean_pearson for c in result.clusters]
-
-    # 1. Number of periods per cluster
-    ax1 = axes[0, 0]
-    bars1 = ax1.bar(
-        cluster_ids, n_periods, color=SOFT_GREY, alpha=0.7, edgecolor=DARK_GREY, linewidth=0.6
-    )
-    ax1.set_xlabel("Cluster ID", fontweight="normal")
-    ax1.set_ylabel("Number of Periods", fontweight="normal")
-    ax1.set_title("Cluster sizes", fontweight="normal")
-    ax1.grid(True, alpha=0.3, axis="y", linewidth=0.5)
-
-    # Add value labels on bars
-    for bar in bars1:
-        height = bar.get_height()
-        ax1.text(
-            bar.get_x() + bar.get_width() / 2.0,
-            height,
-            f"{int(height)}",
-            ha="center",
-            va="bottom",
-            fontsize=9,
-            fontweight="normal",
-        )
-
-    # 2. Mean bias per cluster
-    ax2 = axes[0, 1]
-    colors = [SWISS_RED if b < 0 else SOFT_GREY for b in mean_bias]
-    bars2 = ax2.bar(
-        cluster_ids, mean_bias, color=colors, alpha=0.7, edgecolor=DARK_GREY, linewidth=0.6
-    )
-    ax2.axhline(y=0, color=MID_GREY, linestyle="-", alpha=0.8, linewidth=1)
-    ax2.set_xlabel("Cluster ID", fontweight="normal")
-    ax2.set_ylabel("Mean Bias (%)", fontweight="normal")
-    ax2.set_title("Bias by cluster", fontweight="normal")
-    ax2.grid(True, alpha=0.3, axis="y", linewidth=0.5)
-
-    # 3. MAE and RMSE per cluster
-    ax3 = axes[1, 0]
-    x = np.arange(len(cluster_ids))
-    width = 0.35
-    ax3.bar(
-        x - width / 2,
-        mean_mae,
-        width,
-        label="MAE",
-        color=SOFT_GREY,
-        alpha=0.7,
-        edgecolor=DARK_GREY,
-        linewidth=0.6,
-    )
-    ax3.bar(
-        x + width / 2,
-        mean_rmse,
-        width,
-        label="RMSE",
-        color=MID_GREY,
-        alpha=0.7,
-        edgecolor=DARK_GREY,
-        linewidth=0.6,
-    )
-    ax3.set_xlabel("Cluster ID", fontweight="normal")
-    ax3.set_ylabel("Error (GWh)", fontweight="normal")
-    ax3.set_title("Error metrics by cluster", fontweight="normal")
-    ax3.set_xticks(x)
-    ax3.set_xticklabels(cluster_ids)
-    ax3.legend(frameon=False, fontsize=8)
-    ax3.grid(True, alpha=0.3, axis="y", linewidth=0.5)
-
-    # 4. Correlation per cluster
-    ax4 = axes[1, 1]
-    bars4 = ax4.bar(
-        cluster_ids, mean_pearson, color=SOFT_GREY, alpha=0.7, edgecolor=DARK_GREY, linewidth=0.6
-    )
-    ax4.axhline(y=0.9, color=SWISS_RED, linestyle=":", alpha=0.5, linewidth=0.8)
-    ax4.axhline(y=0.7, color=SOFT_GREY, linestyle=":", alpha=0.5, linewidth=0.8)
-    ax4.set_xlabel("Cluster ID", fontweight="normal")
-    ax4.set_ylabel("Mean Pearson r", fontweight="normal")
-    ax4.set_title("Correlation by cluster", fontweight="normal")
-    ax4.set_ylim(0, 1.05)
-    ax4.grid(True, alpha=0.3, axis="y", linewidth=0.5)
-
-    # Add explanatory subtitle
-    fig.text(
-        0.5,
-        0.96,
-        f"Each cluster groups rolling windows with similar bias patterns | "
-        f"Total windows analyzed: {sum(n_periods)}",
-        ha="center",
-        va="top",
-        fontsize=9,
-        color=SOFT_GREY,
-        style="italic",
-    )
-
-    plt.suptitle(
-        f"Cluster Characteristics: {result.variable}",
-        fontsize=13,
-        fontweight="normal",
-        y=0.99,
-    )
-
-    plt.tight_layout()
-
-    if output_path:
-        output_path.parent.mkdir(parents=True, exist_ok=True)
-        plt.savefig(output_path, dpi=dpi, bbox_inches="tight", facecolor="white")
-        print(f"📊 Cluster visualization saved to: {output_path}")
-    else:
-        plt.show()
-
-    plt.close()
+        plt.close()
 
 
 def plot_recommendation_timeline(
@@ -562,7 +370,6 @@ def plot_recommendation_timeline(
     # Method colors (Swiss palette)
     method_colors = {
         "scaling": LIGHT_GREY,
-        "advanced_scaling": MID_GREY,
         "benchmarking": SWISS_RED,
         "kalman": SOFT_GREY,
     }
@@ -621,7 +428,7 @@ def plot_recommendation_timeline(
         mpatches.Patch(color=color, label=method.replace("_", " ").title(), alpha=0.8)
         for method, color in method_colors.items()
     ]
-    ax.legend(handles=legend_patches, loc="upper right", fontsize=9, ncol=2, frameon=False)
+    ax.legend(handles=legend_patches, loc="lower left", fontsize=9, ncol=2, frameon=False)
 
     ax.set_xlabel("Date", fontsize=10, fontweight="normal")
     ax.set_ylabel("Recommendation #", fontsize=10, fontweight="normal")
@@ -639,10 +446,8 @@ def plot_recommendation_timeline(
     plt.tight_layout()
 
     if output_path:
-        output_path.parent.mkdir(parents=True, exist_ok=True)
-        plt.savefig(output_path, dpi=dpi, bbox_inches="tight", facecolor="white")
-        print(f"📊 Timeline visualization saved to: {output_path}")
+        save_figure(fig=fig, filename=output_path.name, output_dir=output_path.parent,
+                    variable=None, close_after=True, dpi=dpi)
     else:
         plt.show()
-
-    plt.close()
+        plt.close()

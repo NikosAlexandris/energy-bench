@@ -60,9 +60,9 @@ Required packages:
 ### Basic Command
 
 ```bash
-nrgbnc analyze bias-patterns <variable> \
-  --high-frequency-csv <path-to-entsoe-data> \
-  --low-frequency-csv <path-to-sfoe-data> \
+nrgbnc analyse autodetect-bias <variable> \
+  --indicator-csv <path-to-entsoe-data> \
+  --target-csv <path-to-sfoe-data> \
   --start <start-date> \
   --end <end-date> \
   --output-csv <output-recommendations.csv> \
@@ -73,9 +73,9 @@ nrgbnc analyze bias-patterns <variable> \
 ### Complete Example
 
 ```bash
-nrgbnc analyze bias-patterns river \
-  --high-frequency-csv data/entsoe_hourly.csv \
-  --low-frequency-csv data/sfoe_daily.csv \
+nrgbnc analyse autodetect-bias river \
+  --indicator-csv data/entsoe_hourly.csv \
+  --target-csv data/sfoe_daily.csv \
   --start 2018-01-01 \
   --end 2024-12-31 \
   --output-csv output/river_bias_analysis.csv \
@@ -95,8 +95,8 @@ nrgbnc analyze bias-patterns river \
 ### Required Parameters
 
 - `variable`: Energy type to analyze (e.g., 'river', 'solar', 'nuclear')
-- `--high-frequency-csv`: Path to ENTSO-E hourly data
-- `--low-frequency-csv`: Path to SFOE daily data
+- `--indicator-csv`: Path to ENTSO-E hourly data
+- `--target-csv`: Path to SFOE daily data
 - `--start`: Start date (YYYY-MM-DD)
 - `--end`: End date (YYYY-MM-DD)
 
@@ -122,8 +122,8 @@ nrgbnc analyze bias-patterns river \
   - For bias percentage change
 
 #### Data Column Names
-- `--high-frequency-datetime-column`: DateTime column in ENTSO-E data (default: `DateTime`)
-- `--low-frequency-date-column`: Date column in SFOE data (default: `Date`)
+- `--indicator-time-column`: DateTime column in ENTSO-E data (default: `DateTime`)
+- `--target-time-column`: Date column in SFOE data (default: `Date`)
 
 ## Output Files
 
@@ -217,7 +217,7 @@ Clusters are groups of **rolling window periods** that exhibit similar bias char
 Cluster 2 (14 periods): -0.30% bias, 0.99 correlation → scaling (90% confidence)
   Interpretation: 14 windows (~3-4 months) where data is nearly perfect
   
-Cluster 0 (32 periods): -13.86% bias, 0.95 correlation → advanced_scaling (75% confidence)
+Cluster 0 (32 periods): -13.86% bias, 0.95 correlation → kalman (75% confidence)
   Interpretation: Most of the year has moderate underestimation but good shape
   
 Cluster 1 (4 periods): -16.88% bias, 0.92 correlation → benchmarking (80% confidence)
@@ -257,9 +257,9 @@ The system recommends methods based on these criteria:
 Analyze river data and get recommendations:
 
 ```bash
-nrgbnc analyze bias-patterns river \
-  --high-frequency-csv data/entsoe_hourly.csv \
-  --low-frequency-csv data/sfoe_daily.csv \
+nrgbnc analyse autodetect-bias river \
+  --indicator-csv data/entsoe_hourly.csv \
+  --target-csv data/sfoe_daily.csv \
   --start 2020-01-01 \
   --end 2024-12-31 \
   --output-csv output/river_recommendations.csv
@@ -270,9 +270,9 @@ nrgbnc analyze bias-patterns river \
 Full analysis with all outputs:
 
 ```bash
-nrgbnc analyze bias-patterns solar \
-  --high-frequency-csv data/entsoe_hourly.csv \
-  --low-frequency-csv data/sfoe_daily.csv \
+nrgbnc analyse autodetect-bias solar \
+  --indicator-csv data/entsoe_hourly.csv \
+  --target-csv data/sfoe_daily.csv \
   --start 2015-01-01 \
   --end 2024-12-31 \
   --output-csv output/solar_recommendations.csv \
@@ -290,9 +290,9 @@ nrgbnc analyze bias-patterns solar \
 Adjust sensitivity for changepoint detection:
 
 ```bash
-nrgbnc analyze bias-patterns nuclear \
-  --high-frequency-csv data/entsoe_hourly.csv \
-  --low-frequency-csv data/sfoe_daily.csv \
+nrgbnc analyse autodetect-bias nuclear \
+  --indicator-csv data/entsoe_hourly.csv \
+  --target-csv data/sfoe_daily.csv \
   --start 2016-01-01 \
   --end 2025-12-31 \
   --output-csv output/nuclear_recommendations.csv \
@@ -309,9 +309,9 @@ Batch analysis for all variables:
 ```bash
 for var in river solar nuclear storage water wind thermal; do
   echo "Analyzing $var..."
-  nrgbnc analyze bias-patterns $var \
-    --high-frequency-csv data/entsoe_hourly.csv \
-    --low-frequency-csv data/sfoe_daily.csv \
+  nrgbnc analyse autodetect-bias $var \
+    --indicator-csv data/entsoe_hourly.csv \
+    --target-csv data/sfoe_daily.csv \
     --start 2018-01-01 \
     --end 2024-12-31 \
     --output-csv output/${var}_recommendations.csv \
@@ -343,8 +343,8 @@ For each recommended period, use the appropriate command:
 #### Scaling
 ```bash
 nrgbnc scale river \
-  --high-frequency-csv data/entsoe_hourly.csv \
-  --low-frequency-csv data/sfoe_daily.csv \
+  --indicator-csv data/entsoe_hourly.csv \
+  --target-csv data/sfoe_daily.csv \
   --start 2020-01-01 \
   --end 2020-12-31 \
   --output-csv output/river_scaled_2020.csv
@@ -353,8 +353,8 @@ nrgbnc scale river \
 #### Benchmarking
 ```bash
 nrgbnc benchmark river \
-  --high-frequency-csv data/entsoe_hourly.csv \
-  --low-frequency-csv data/sfoe_daily.csv \
+  --indicator-csv data/entsoe_hourly.csv \
+  --target-csv data/sfoe_daily.csv \
   --start 2021-01-01 \
   --end 2021-12-31 \
   --output-csv output/river_benchmarked_2021.csv
@@ -363,8 +363,8 @@ nrgbnc benchmark river \
 #### Advanced Scaling
 ```bash
 nrgbnc scale river \
-  --high-frequency-csv data/entsoe_hourly.csv \
-  --low-frequency-csv data/sfoe_daily.csv \
+  --indicator-csv data/entsoe_hourly.csv \
+  --target-csv data/sfoe_daily.csv \
   --start 2022-01-01 \
   --end 2022-12-31 \
   --output-csv output/river_advanced_2022.csv \
@@ -506,9 +506,9 @@ The bias detection system complements existing commands:
 
 ```bash
 # 1. Detect patterns and get recommendations
-nrgbnc analyze bias-patterns river \
-  --high-frequency-csv data/entsoe_hourly.csv \
-  --low-frequency-csv data/sfoe_daily.csv \
+nrgbnc analyse autodetect-bias river \
+  --indicator-csv data/entsoe_hourly.csv \
+  --target-csv data/sfoe_daily.csv \
   --start 2020-01-01 \
   --end 2024-12-31 \
   --output-csv output/river_recs.csv

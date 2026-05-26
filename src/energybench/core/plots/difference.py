@@ -27,6 +27,9 @@ def plot_series_difference(
     units: str = "GWh",
     xlabel: str = "",
     difference_panel: bool = True,
+    show_rolling_mean: bool = True,
+    use_step: bool = True,
+    difference_label: str | None = None,
 ) -> Figure:
     """ """
     # Series
@@ -55,19 +58,26 @@ def plot_series_difference(
         ax.tick_params(axis="both", labelsize=9, colors="0.25", length=3, width=0.6)
         ax.grid(False)
 
-    # First the low-frequency series
-    # Daily target in muted Swiss red, fine dashed
-    ax_top.step(
-        target_series.index,
-        target_series.values,
-        where="mid",
-        color=SWISS_RED,
-        linewidth=0.7,
-        alpha=0.9,
-    )
+    # Second series — step only when comparing against a low-frequency target
+    if use_step:
+        ax_top.step(
+            target_series.index,
+            target_series.values,
+            where="mid",
+            color=SWISS_RED,
+            linewidth=0.7,
+            alpha=0.9,
+        )
+    else:
+        ax_top.plot(
+            target_series.index,
+            target_series.values,
+            color=SWISS_RED,
+            linewidth=0.7,
+            alpha=0.9,
+        )
 
-    # Then the high-frequency series
-    # Top: benchmarked hourly
+    # First series — always drawn as a line
     ax_top.plot(
         benchmarked_series.index,
         benchmarked_series.values,
@@ -92,13 +102,14 @@ def plot_series_difference(
             zorder=5,
         )
 
-    bench_rolling = benchmarked_series.rolling(24, center=True, min_periods=1).mean()
-    ax_top.plot(
-        bench_rolling.index,
-        bench_rolling.values,
-        color=DARK_GREY,
-        linewidth=0.4,
-    )
+    if show_rolling_mean:
+        bench_rolling = benchmarked_series.rolling(24, center=True, min_periods=1).mean()
+        ax_top.plot(
+            bench_rolling.index,
+            bench_rolling.values,
+            color=DARK_GREY,
+            linewidth=0.4,
+        )
 
     ax_top.set_ylabel(units, fontsize=9, color=LESS_THAN_BLACK)
     if difference_panel:
@@ -183,23 +194,23 @@ def plot_series_difference(
     renderer = fig.canvas.get_renderer()
     label_1_width = _text_width_in_figcoords(fig, label_1, renderer)
 
-    rolling_label_x = x0 + label_1_width + gap
-    rolling_label = fig.text(
-        rolling_label_x,
-        subtitle_y,
-        f"— {rolling_label}",
-        ha="left",
-        va="top",
-        fontsize=8,
-        color=DARK_GREY,
-    )
-
-    fig.canvas.draw()
-    renderer = fig.canvas.get_renderer()
-    rolling_label_width = _text_width_in_figcoords(fig, rolling_label, renderer)
-
-    # Second label
-    label_2_x = rolling_label_x + rolling_label_width + gap
+    if show_rolling_mean:
+        rolling_label_x = x0 + label_1_width + gap
+        rolling_label = fig.text(
+            rolling_label_x,
+            subtitle_y,
+            f"— {rolling_label}",
+            ha="left",
+            va="top",
+            fontsize=8,
+            color=DARK_GREY,
+        )
+        fig.canvas.draw()
+        renderer = fig.canvas.get_renderer()
+        rolling_label_width = _text_width_in_figcoords(fig, rolling_label, renderer)
+        label_2_x = rolling_label_x + rolling_label_width + gap
+    else:
+        label_2_x = x0 + label_1_width + gap
     label_2 = fig.text(
         label_2_x,
         subtitle_y,
@@ -213,6 +224,7 @@ def plot_series_difference(
     fig.canvas.draw()
     renderer = fig.canvas.get_renderer()
     label_2_width = _text_width_in_figcoords(fig, label_2, renderer)
+
     missing_label_x = label_2_x + label_2_width + gap
     if missing_mask.any():
         fig.text(
@@ -241,7 +253,7 @@ def plot_series_difference(
 
         fig.text(
             0.09, 0.11,
-            "Difference between low-frequency & aggregated high-frequency series",
+            difference_label or "Difference between low-frequency & aggregated high-frequency series",
             ha="left", va="bottom", fontsize=7, color="0.45",
         )
 
@@ -251,6 +263,22 @@ def plot_series_difference(
         ax_diff.xaxis.grid(False)
     else:
         ax_top.set_xlabel(xlabel, fontsize=9, color=LESS_THAN_BLACK)
+        # Metrics annotation
+        aligned = pd.concat(
+            [benchmarked_series, target_series], axis=1, join="inner"
+        ).dropna()
+        if len(aligned) > 1:
+            s1, s2 = aligned.iloc[:, 0], aligned.iloc[:, 1]
+            mae = (s1 - s2).abs().mean()
+            bias_pct = ((s1 - s2).mean() / s2.mean()) * 100
+            corr = s1.corr(s2)
+            metrics_text = f"MAE {mae:.2f} {units}  ·  Bias {bias_pct:+.1f}%  ·  ρ {corr:.3f}"
+            ax_top.text(
+                0.97, 0.97, metrics_text,
+                transform=ax_top.transAxes,
+                fontsize=9, color="0.45",
+                ha="right", va="top",
+            )
 
     if not benchmarked_series_label and not target_series_label:
         # Colored subtitle row
@@ -296,6 +324,8 @@ def _draw_series_on_ax(
     xlabel: str = "",
     show_xaxis: bool = False,
     show_ylabel: bool = True,
+    show_rolling_mean: bool = True,
+    use_step: bool = True,
 ) -> None:
     """Low-level drawing of the two series onto a given axes."""
     ax.spines["top"].set_visible(False)
@@ -305,14 +335,23 @@ def _draw_series_on_ax(
     ax.tick_params(axis="both", labelsize=8, colors="0.25", length=3, width=0.6)
     ax.grid(False)
 
-    ax.step(
-        target_series.index,
-        target_series.values,
-        where="mid",
-        color=SWISS_RED,
-        linewidth=0.7,
-        alpha=0.9,
-    )
+    if use_step:
+        ax.step(
+            target_series.index,
+            target_series.values,
+            where="mid",
+            color=SWISS_RED,
+            linewidth=0.7,
+            alpha=0.9,
+        )
+    else:
+        ax.plot(
+            target_series.index,
+            target_series.values,
+            color=SWISS_RED,
+            linewidth=0.7,
+            alpha=0.9,
+        )
     ax.plot(
         benchmarked_series.index,
         benchmarked_series.values,
@@ -346,6 +385,8 @@ def plot_combined_comparison(
     series2_source: str | None = None,
     start: pd.Timestamp | None = None,
     end: pd.Timestamp | None = None,
+    show_rolling_mean: bool = True,
+    use_step: bool = True,
 ) -> Figure:
     """Faceted comparison: stacked subplots, one figure-level title & subtitle."""
     n = len(series_data)
@@ -362,6 +403,8 @@ def plot_combined_comparison(
             xlabel="Time" if is_last else "",
             show_xaxis=is_last,
             show_ylabel=idx == 0,
+            show_rolling_mean=show_rolling_mean,
+            use_step=use_step,
         )
 
         # Variable name inside the plot, vertically centered just before the line

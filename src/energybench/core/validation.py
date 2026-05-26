@@ -6,8 +6,7 @@ from enum import Enum
 class KindOfCSV(str, Enum):
     benchmarked = "benchmarked"
     scaled = "scaled"
-    scaled_per_day = "scaled-per-day"
-    reconciled = "reconciled"
+    ukf = "ukf"
 
 
 def save_validation_table(check: pd.DataFrame, output_csv: Path) -> None:

@@ -17,13 +17,11 @@ VARIABLES = {
         # Output column names
         "benchmarked_column": "nuclear_benchmarked_gwh",
         "scaled_column": "nuclear_scaled_gwh",
-        "scaled_advanced_column": "nuclear_scaled_per_day_gwh",
         "original_column": "nuclear_gwh",
         
         # Output filename bases
         "benchmarked_filename": "nuclear_hourly_benchmarked",
         "scaled_filename": "nuclear_hourly_scaled",
-        "scaled_advanced_filename": "nuclear_hourly_scaled_advanced",
     },
     "water": {
         "label": "Water",
@@ -44,13 +42,11 @@ VARIABLES = {
         # Output column names
         "benchmarked_column": "water_benchmarked_gwh",
         "scaled_column": "water_scaled_gwh",
-        "scaled_advanced_column": "water_scaled_per_day_gwh",
         "original_column": "water_gwh",
         
         # Output filename bases
         "benchmarked_filename": "water_hourly_benchmarked",
         "scaled_filename": "water_hourly_scaled",
-        "scaled_advanced_filename": "water_hourly_scaled_advanced",
     },
     "storage": {
         "label": "Storage",
@@ -67,13 +63,11 @@ VARIABLES = {
         # Output column names
         "benchmarked_column": "storage_benchmarked_gwh",
         "scaled_column": "storage_scaled_gwh",
-        "scaled_advanced_column": "storage_scaled_per_day_gwh",
         "original_column": "storage_gwh",
         
         # Output filename bases
         "benchmarked_filename": "storage_hourly_benchmarked",
         "scaled_filename": "storage_hourly_scaled",
-        "scaled_advanced_filename": "storage_hourly_scaled_advanced",
     },
     "river": {
         "label": "River",
@@ -90,13 +84,11 @@ VARIABLES = {
         # Output column names
         "benchmarked_column": "river_benchmarked_gwh",
         "scaled_column": "river_scaled_gwh",
-        "scaled_advanced_column": "river_scaled_per_day_gwh",
         "original_column": "river_gwh",
         
         # Output filename bases
         "benchmarked_filename": "river_hourly_benchmarked",
         "scaled_filename": "river_hourly_scaled",
-        "scaled_advanced_filename": "river_hourly_scaled_advanced",
     },
     "solar": {
         "label": "Solar",
@@ -113,13 +105,11 @@ VARIABLES = {
         # Output column names
         "benchmarked_column": "solar_benchmarked_gwh",
         "scaled_column": "solar_scaled_gwh",
-        "scaled_advanced_column": "solar_scaled_per_day_gwh",
         "original_column": "solar_gwh",
         
         # Output filename bases
         "benchmarked_filename": "solar_hourly_benchmarked",
         "scaled_filename": "solar_hourly_scaled",
-        "scaled_advanced_filename": "solar_hourly_scaled_advanced",
     },
     "wind": {
         "label": "Wind",
@@ -136,13 +126,11 @@ VARIABLES = {
         # Output column names
         "benchmarked_column": "wind_benchmarked_gwh",
         "scaled_column": "wind_scaled_gwh",
-        "scaled_advanced_column": "wind_scaled_per_day_gwh",
         "original_column": "wind_gwh",
         
         # Output filename bases
         "benchmarked_filename": "wind_hourly_benchmarked",
         "scaled_filename": "wind_hourly_scaled",
-        "scaled_advanced_filename": "wind_hourly_scaled_advanced",
     },
     "thermal": {
         "label": "Thermal",
@@ -157,7 +145,7 @@ VARIABLES = {
             "Other",
             "Waste",
         ],
-        "target_types": ["Thermische Erzeugung"],
+        "target_types": ["Thermische"],  # Erzeugung
         
         # Source metadata (for provenance tracking)
         "default_indicator_source": "ENTSO-E",
@@ -166,13 +154,11 @@ VARIABLES = {
         # Output column names
         "benchmarked_column": "thermal_benchmarked_gwh",
         "scaled_column": "thermal_scaled_gwh",
-        "scaled_advanced_column": "thermal_scaled_per_day_gwh",
         "original_column": "thermal_gwh",
         
         # Output filename bases
         "benchmarked_filename": "thermal_hourly_benchmarked",
         "scaled_filename": "thermal_hourly_scaled",
-        "scaled_advanced_filename": "thermal_hourly_scaled_advanced",
     },
 }
 
@@ -219,10 +205,8 @@ def get_variable_config(
     cfg["indicator_type"] = cfg["indicator_types"]
     cfg["output_column"] = cfg["benchmarked_column"]
     cfg["scaled_output_column"] = cfg["scaled_column"]
-    cfg["scaled_advanced_output_column"] = cfg["scaled_advanced_column"]
     cfg["output_filename"] = cfg["benchmarked_filename"]
     cfg["scaled_output_filename"] = cfg["scaled_filename"]
-    cfg["scaled_advanced_output_filename"] = cfg["scaled_advanced_filename"]
 
     # Validate which columns are present/missing
     if target_columns is not None:
@@ -250,3 +234,6 @@ def get_variable_config(
             )
 
     return cfg
+
+
+VARIABLE_ORDER = ["nuclear", "water", "storage", "river", "solar", "wind", "thermal"]

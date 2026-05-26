@@ -39,7 +39,7 @@ def scale_series(
             daily_val = daily_sum.loc[day]
             target_val = target_series.loc[day]
             print(
-                f"   {day.date()}: factor={f:.1f}x (daily_sum={daily_val:.4f} GWh, target={target_val:.2f} GWh)"
+                f"   {pd.Timestamp(day).date()}: factor={f:.1f}x (daily_sum={daily_val:.4f} GWh, target={target_val:.2f} GWh)"
             )
         if len(extreme_factors) > 5:
             print(f"   ... and {len(extreme_factors) - 5} more days")
@@ -51,11 +51,11 @@ def scale_series(
             f"⚠️  Warning: {len(small_sums)} days have very small hourly sums (<{min_daily_sum} GWh):"
         )
         for day, s in small_sums.head(5).items():
-            print(f"   {day.date()}: sum={s:.6f} GWh")
+            print(f"   {pd.Timestamp(day).date()}: sum={s:.6f} GWh")
         if len(small_sums) > 5:
             print(f"   ... and {len(small_sums) - 5} more days")
         print(
-            f"   Consider using advanced scaling with min_value parameter or checking data quality."
+            "   Consider using the --min-value parameter or checking data quality."
         )
 
     scaled_series = indicator_series * factor.reindex(day_index).to_numpy()
